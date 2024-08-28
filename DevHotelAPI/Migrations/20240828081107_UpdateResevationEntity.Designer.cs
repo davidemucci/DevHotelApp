@@ -4,6 +4,7 @@ using DevHotelAPI.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHotelAPI.Migrations
 {
     [DbContext(typeof(HotelDevContext))]
-    partial class HotelDevContextModelSnapshot : ModelSnapshot
+    [Migration("20240828081107_UpdateResevationEntity")]
+    partial class UpdateResevationEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,13 +89,12 @@ namespace DevHotelAPI.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoomTypeId")
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Number");
 
-                    b.HasIndex("RoomTypeId")
-                        .IsUnique();
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Rooms");
                 });
@@ -131,8 +133,8 @@ namespace DevHotelAPI.Migrations
             modelBuilder.Entity("DevHotelAPI.Entities.Room", b =>
                 {
                     b.HasOne("DevHotelAPI.Entities.RoomType", "Type")
-                        .WithOne()
-                        .HasForeignKey("DevHotelAPI.Entities.Room", "RoomTypeId")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
