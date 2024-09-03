@@ -25,7 +25,7 @@ namespace DevHotelAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
         {
-            return await _context.Reservations.ToListAsync();
+            return await _context.Reservations.Include(c => c.Client).ToListAsync();
         }
 
         // GET: api/Reservations/5
