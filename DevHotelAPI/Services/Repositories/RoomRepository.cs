@@ -15,12 +15,12 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task<IEnumerable<RoomType>> GetAllRoomTypesAsync()
         {
-            return await _context.RoomTypes.ToListAsync();
+            return await _context.RoomTypes.AsNoTracking().ToListAsync();
         }
 
-        public async Task<RoomType> GetRoomTypeByIdAsync(int id)
+        public async Task<RoomType?> GetRoomTypeByIdAsync(int id)
         {
-            return await _context.RoomTypes.FindAsync(id);
+            return await _context.RoomTypes.Where(r => r.Id.Equals(id)).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task AddRoomTypeAsync(RoomType roomType)

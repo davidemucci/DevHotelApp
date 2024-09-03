@@ -1,6 +1,13 @@
+using AutoMapper;
 using DevHotelAPI.Contexts;
+using DevHotelAPI.Dtos;
+using DevHotelAPI.Entities;
 using DevHotelAPI.Services;
+using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Validators;
+using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -18,6 +25,8 @@ builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
     builder.Configuration.GetConnectionString("HotelDevConnectionString")));
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
+builder.Services.AddAutoMapper(typeof(MainMapperProfile));
+builder.Services.AddScoped<IValidator<RoomTypeDto>, RoomTypeDtoValidator>();
 
 var app = builder.Build();
 

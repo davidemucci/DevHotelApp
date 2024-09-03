@@ -46,10 +46,16 @@ namespace DevHotelAPI.Contexts
 
             });
 
-            modelBuilder.Entity<RoomType>()
-                .HasKey(e => e.Id);
+            modelBuilder.Entity<RoomType>(entity =>
+            {
+                entity.Property(e => e.Description).IsRequired();
+                entity.Property(e => e.TotalNumber).IsRequired();
+                entity.HasKey(e => e.Id);
+            });
 
-            DbInitialize(modelBuilder);
+            if (!IsInMemoryDatabase())
+                DbInitialize(modelBuilder);
+
             base.OnModelCreating(modelBuilder);
 
         }

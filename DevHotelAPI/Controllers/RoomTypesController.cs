@@ -1,5 +1,8 @@
-﻿using DevHotelAPI.Entities;
+﻿using AutoMapper;
+using DevHotelAPI.Dtos;
+using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Repositories;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +11,17 @@ using Microsoft.EntityFrameworkCore;
 public class RoomTypesController : ControllerBase
 {
     private readonly IRoomTypeRepository _roomTypeRepository;
+    private readonly DbContext _dbContext;
+    private readonly IMapper _mapper;
+    private readonly IValidator<RoomTypeDto> _validator;
 
-    public RoomTypesController(IRoomTypeRepository roomTypeRepository)
+
+    public RoomTypesController(DbContext dbContext, IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomTypeDto> validator)
     {
+        _dbContext = dbContext;
+        _mapper = mapper;   
         _roomTypeRepository = roomTypeRepository;
+        _validator = validator;
     }
 
     [HttpGet]
@@ -30,7 +40,7 @@ public class RoomTypesController : ControllerBase
             return NotFound();
         }
 
-        return roomType;
+        return Ok(roomType);
     }
 
     [HttpPut("{id}")]
@@ -47,7 +57,8 @@ public class RoomTypesController : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (await _roomTypeRepository.GetRoomTypeByIdAsync(id) == null)
+            var existingRoom = await _roomTypeRepository.GetRoomTypeByIdAsync(id);
+            if (existingRoom == null)
             {
                 return NotFound();
             }
@@ -61,8 +72,17 @@ public class RoomTypesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<RoomType>> PostRoomType(RoomType roomType)
+    public async Task<ActionResult<RoomType>> PostRoomType(RoomTypeDto roomTypeDto)
     {
+
+        if(!ModelState.IsValid) 
+            return BadRequest(ModelState);
+
+        if (!_validator.Validate(roomTypeDto).IsValid)
+            return BadRequest(_validator.Validate(roomTypeDto).Errors);
+        
+
+        var roomType = _mapper.Map<RoomType>(roomTypeDto);
         await _roomTypeRepository.AddRoomTypeAsync(roomType);
         return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
     }
