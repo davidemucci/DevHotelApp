@@ -28,7 +28,7 @@ namespace DevHotelAPI.Controllers
         public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms()
         {
             var rooms = await _repository.GetAllRoomAsync();
-            return Ok(rooms);
+            return Ok(_mapper.Map<List<RoomDto>>(rooms));
         }
 
         [HttpGet("{id}")]
@@ -39,7 +39,7 @@ namespace DevHotelAPI.Controllers
             if (room == null)
                 return NotFound();
 
-            return Ok(room);
+            return Ok(_mapper.Map<RoomDto>(room));
         }
 
         [HttpPut("{id}")]
@@ -48,7 +48,7 @@ namespace DevHotelAPI.Controllers
             if (id != roomDto.Number)
                 return BadRequest();
 
-            if(ModelState.IsValid)
+            if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var room = _mapper.Map<Room>(roomDto);
@@ -72,9 +72,9 @@ namespace DevHotelAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Room>> PostRoom(RoomDto roomDto)
+        public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var room = _mapper.Map<Room>(roomDto);
@@ -83,7 +83,7 @@ namespace DevHotelAPI.Controllers
                 return BadRequest(_validator.Validate(room).Errors);
 
             await _repository.AddRoomAsync(room);
-            return CreatedAtAction("GetRoom", new { id = room.Number }, room);
+            return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
         }
 
         [HttpDelete("{id}")]

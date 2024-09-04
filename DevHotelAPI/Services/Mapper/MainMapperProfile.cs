@@ -9,6 +9,7 @@ namespace DevHotelAPI.Services.Mapper
         public MainMapperProfile()
         {
             CreateMap<RoomTypeDto, RoomType>();
+            CreateMap<RoomDto, Room>().ReverseMap();
         }
     }
 }
