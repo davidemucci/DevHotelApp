@@ -4,6 +4,7 @@ using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
+using DevHotelAPI.Dtos;
 
 namespace DevHotelAPI.Contexts
 {
@@ -78,6 +79,8 @@ namespace DevHotelAPI.Contexts
         {
             return Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
         }
+        public DbSet<DevHotelAPI.Dtos.ClientDto> ClientDto { get; set; } = default!;
+        public DbSet<DevHotelAPI.Dtos.ReservationDto> ReservationDto { get; set; } = default!;
     }
 
 }

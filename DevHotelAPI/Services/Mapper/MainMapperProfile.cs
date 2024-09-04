@@ -10,6 +10,8 @@ namespace DevHotelAPI.Services.Mapper
         {
             CreateMap<RoomTypeDto, RoomType>();
             CreateMap<RoomDto, Room>().ReverseMap();
+            CreateMap<ClientDto, Client>().ReverseMap();
+            CreateMap<ReservationDto, Reservation>().ReverseMap();
         }
     }
 }
