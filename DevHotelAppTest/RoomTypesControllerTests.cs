@@ -6,6 +6,7 @@ using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -19,7 +20,7 @@ namespace DevHotelAppTest
         private readonly RoomTypesController _controller;
         private readonly IMapper _mapper;   
         private readonly IRoomTypeRepository _repository;
-        private readonly IValidator<RoomTypeDto> _validator;
+        private readonly IValidator<RoomType> _validator;
 
         public RoomTypesControllerTests(DatabaseFixture databaseFixture)
         {
@@ -29,7 +30,7 @@ namespace DevHotelAppTest
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
             _repository = new RoomTypeRepository(_context);
-            _validator = (IValidator<RoomTypeDto>)new RoomTypeDtoValidator();
+            _validator = (IValidator<RoomType>)new RoomTypeValidator();
             _controller = new RoomTypesController(_context, _mapper, _repository, _validator);
         }
 
@@ -142,6 +143,9 @@ namespace DevHotelAppTest
             var result = await _controller.PostRoomType(roomTypeDto);
             // Assert
             var actionResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var errorResponse = Assert.IsType<List<ValidationFailure>>(actionResult.Value);
+            Assert.Equal("TotalNumber must be greater than one.", errorResponse.Where(x => x.PropertyName.Equals("TotalNumber")).Select(x => x.ErrorMessage).FirstOrDefault());
+
         }
 
         [Fact]

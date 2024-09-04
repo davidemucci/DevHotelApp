@@ -13,10 +13,10 @@ public class RoomTypesController : ControllerBase
     private readonly IRoomTypeRepository _roomTypeRepository;
     private readonly DbContext _dbContext;
     private readonly IMapper _mapper;
-    private readonly IValidator<RoomTypeDto> _validator;
+    private readonly IValidator<RoomType> _validator;
 
 
-    public RoomTypesController(DbContext dbContext, IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomTypeDto> validator)
+    public RoomTypesController(DbContext dbContext, IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator)
     {
         _dbContext = dbContext;
         _mapper = mapper;   
@@ -46,7 +46,7 @@ public class RoomTypesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRoomType(int id, RoomType roomType)
     {
-        if (id != roomType.Id)
+        if (id != roomType.Id || id == 0 || roomType.Id == 0)
         {
             return BadRequest();
         }
@@ -77,12 +77,13 @@ public class RoomTypesController : ControllerBase
 
         if(!ModelState.IsValid) 
             return BadRequest(ModelState);
+        
+        var roomType = _mapper.Map<RoomType>(roomTypeDto);
 
-        if (!_validator.Validate(roomTypeDto).IsValid)
-            return BadRequest(_validator.Validate(roomTypeDto).Errors);
+        if (!_validator.Validate(roomType).IsValid)
+            return BadRequest(_validator.Validate(roomType).Errors);
         
 
-        var roomType = _mapper.Map<RoomType>(roomTypeDto);
         await _roomTypeRepository.AddRoomTypeAsync(roomType);
         return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
     }

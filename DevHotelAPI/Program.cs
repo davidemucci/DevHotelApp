@@ -26,7 +26,7 @@ builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
 builder.Services.AddAutoMapper(typeof(MainMapperProfile));
-builder.Services.AddScoped<IValidator<RoomTypeDto>, RoomTypeDtoValidator>();
+builder.Services.AddScoped<IValidator<RoomType>, RoomTypeValidator>();
 
 var app = builder.Build();
 

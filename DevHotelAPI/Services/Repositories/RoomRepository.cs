@@ -1,5 +1,6 @@
 ﻿using DevHotelAPI.Contexts;
 using DevHotelAPI.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Services.Repositories
@@ -31,6 +32,9 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task UpdateRoomTypeAsync(RoomType roomType)
         {
+            if (roomType.Id == 0)
+                throw new ArgumentNullException(nameof(roomType.Id));
+
             _context.Entry(roomType).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
