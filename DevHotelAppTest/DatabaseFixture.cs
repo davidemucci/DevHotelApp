@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Contexts;
 using DevHotelAPI.Services;
+using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
-using DevHotelAPI.Services.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

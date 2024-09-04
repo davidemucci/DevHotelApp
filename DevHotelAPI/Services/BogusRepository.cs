@@ -1,6 +1,6 @@
 ﻿using Bogus;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Services.Contracts;
 
 namespace DevHotelAPI.Services
 {

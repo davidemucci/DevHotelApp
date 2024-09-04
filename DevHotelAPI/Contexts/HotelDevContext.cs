@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services;
-using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 

@@ -3,6 +3,7 @@ using DevHotelAPI.Contexts;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services;
+using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
@@ -25,8 +26,12 @@ builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
     builder.Configuration.GetConnectionString("HotelDevConnectionString")));
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+
+
 builder.Services.AddAutoMapper(typeof(MainMapperProfile));
 builder.Services.AddScoped<IValidator<RoomType>, RoomTypeValidator>();
+builder.Services.AddScoped<IValidator<Room>, RoomValidator>();
 
 var app = builder.Build();
 

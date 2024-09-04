@@ -1,50 +1,47 @@
 ﻿using DevHotelAPI.Contexts;
 using DevHotelAPI.Entities;
-using Microsoft.AspNetCore.Http.HttpResults;
+using DevHotelAPI.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Services.Repositories
 {
-    public class RoomTypeRepository : IRoomTypeRepository
+    public class RoomRepository : IRoomRepository
     {
         private readonly HotelDevContext _context;
 
-        public RoomTypeRepository(HotelDevContext context)
+        public RoomRepository(HotelDevContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<RoomType>> GetAllRoomTypesAsync()
+        public async Task<IEnumerable<Room>> GetAllRoomAsync()
         {
-            return await _context.RoomTypes.AsNoTracking().ToListAsync();
+            return await _context.Rooms.ToListAsync();
         }
 
-        public async Task<RoomType?> GetRoomTypeByIdAsync(int id)
+        public async Task<Room?> GetByIdRoomAsync(int id)
         {
-            return await _context.RoomTypes.Where(r => r.Id.Equals(id)).AsNoTracking().FirstOrDefaultAsync();
+            return await _context.Rooms.FindAsync(id);
         }
 
-        public async Task AddRoomTypeAsync(RoomType roomType)
+        public async Task AddRoomAsync(Room room)
         {
-            await _context.RoomTypes.AddAsync(roomType);
+            await _context.Rooms.AddAsync(room);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateRoomTypeAsync(RoomType roomType)
+        public async Task UpdateRoomAsync(Room room)
         {
-            if (roomType.Id == 0)
-                throw new ArgumentNullException(nameof(roomType.Id));
-
-            _context.Entry(roomType).State = EntityState.Modified;
+            _context.Rooms.Update(room);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteRoomTypeAsync(int id)
+        public async Task DeleteRoomAsync(int id)
         {
-            var roomType = await _context.RoomTypes.FindAsync(id);
-            if (roomType != null)
+            var room = await _context.Rooms.FindAsync(id);
+            if (room != null)
             {
-                _context.RoomTypes.Remove(roomType);
+                _context.Rooms.Remove(room);
                 await _context.SaveChangesAsync();
             }
         }

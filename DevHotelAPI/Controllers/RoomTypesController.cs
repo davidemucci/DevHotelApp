@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +11,12 @@ using Microsoft.EntityFrameworkCore;
 public class RoomTypesController : ControllerBase
 {
     private readonly IRoomTypeRepository _roomTypeRepository;
-    private readonly DbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly IValidator<RoomType> _validator;
 
 
-    public RoomTypesController(DbContext dbContext, IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator)
+    public RoomTypesController( IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator)
     {
-        _dbContext = dbContext;
         _mapper = mapper;   
         _roomTypeRepository = roomTypeRepository;
         _validator = validator;
@@ -36,20 +34,21 @@ public class RoomTypesController : ControllerBase
     {
         var roomType = await _roomTypeRepository.GetRoomTypeByIdAsync(id);
         if (roomType == null)
-        {
             return NotFound();
-        }
 
         return Ok(roomType);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutRoomType(int id, RoomType roomType)
+    public async Task<IActionResult> PutRoomType(int id, RoomTypeDto roomTypeDto)
     {
-        if (id != roomType.Id || id == 0 || roomType.Id == 0)
-        {
-            return BadRequest();
-        }
+        if (id != roomTypeDto.Id || id == 0 || roomTypeDto.Id == 0)
+            return BadRequest(ModelState);
+
+        var roomType = _mapper.Map<RoomType>(roomTypeDto);
+
+        if (!_validator.Validate(roomType).IsValid)
+            return BadRequest(_validator.Validate(roomType).Errors);
 
         try
         {
@@ -59,13 +58,9 @@ public class RoomTypesController : ControllerBase
         {
             var existingRoom = await _roomTypeRepository.GetRoomTypeByIdAsync(id);
             if (existingRoom == null)
-            {
                 return NotFound();
-            }
             else
-            {
                 throw;
-            }
         }
 
         return NoContent();
@@ -82,7 +77,6 @@ public class RoomTypesController : ControllerBase
 
         if (!_validator.Validate(roomType).IsValid)
             return BadRequest(_validator.Validate(roomType).Errors);
-        
 
         await _roomTypeRepository.AddRoomTypeAsync(roomType);
         return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);

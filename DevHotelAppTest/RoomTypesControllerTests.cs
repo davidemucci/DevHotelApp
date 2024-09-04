@@ -2,6 +2,7 @@ using AutoMapper;
 using DevHotelAPI.Contexts;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
+using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
@@ -17,7 +18,7 @@ namespace DevHotelAppTest
     {
         private readonly DatabaseFixture _databaseFixture;
         private readonly HotelDevContext _context;
-        private readonly RoomTypesController _controller;
+        private readonly RoomTypesController _controller; 
         private readonly IMapper _mapper;   
         private readonly IRoomTypeRepository _repository;
         private readonly IValidator<RoomType> _validator;
@@ -31,7 +32,7 @@ namespace DevHotelAppTest
             _mapper = databaseFixture.GetMapper();
             _repository = new RoomTypeRepository(_context);
             _validator = (IValidator<RoomType>)new RoomTypeValidator();
-            _controller = new RoomTypesController(_context, _mapper, _repository, _validator);
+            _controller = new RoomTypesController( _mapper, _repository, _validator);
         }
 
 
@@ -74,21 +75,25 @@ namespace DevHotelAppTest
         public async Task PutRoomType_ReturnsBadRequest_WhenIdDoesNotMatch()
         {
             // Arrange
-            var roomType = new RoomType { Id = 1 };
-            roomType.TotalNumber = 200;
+            var roomType = new RoomTypeDto
+            {
+                Id = 1,
+                TotalNumber = 200,
+                Description = "Dscrizione"
+            };
 
             // Act
             var result = await _controller.PutRoomType(3, roomType);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
         public async Task PutRoomType_ReturnsNotFound_WhenRoomTypeDoesNotExist()
         {
             // Arrange
-            var roomType = new RoomType { Id = 999 }; // Assuming 999 does not exist in the generated data
+            var roomType = new RoomTypeDto { Id = 999, Description = "Descrizione", TotalNumber = 111 };
 
             // Act
             var result = await _controller.PutRoomType(999, roomType);
@@ -100,16 +105,30 @@ namespace DevHotelAppTest
         [Fact]
         public async Task PutRoomType_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
-            var roomType = new RoomType
+            var roomType = new RoomTypeDto
             {
                 Id = 4,
                 Description = "New King Room",
                 TotalNumber = 100
             };
-            var result = await _controller.PutRoomType(roomType.Id, roomType);
+            var result = await _controller.PutRoomType((int)roomType.Id, roomType);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task PutRoomType_ReturnsBadRequest_WhenDtoIsNotValid()
+        {
+            var roomType = new RoomTypeDto
+            {
+                Id = 4,
+                TotalNumber = 100
+            };
+            var result = await _controller.PutRoomType((int)roomType.Id, roomType);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]

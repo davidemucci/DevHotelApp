@@ -1,6 +1,6 @@
 ﻿using DevHotelAPI.Entities;
 
-namespace DevHotelAPI.Services.Repositories
+namespace DevHotelAPI.Services.Contracts
 {
     public interface IRoomTypeRepository
     {
