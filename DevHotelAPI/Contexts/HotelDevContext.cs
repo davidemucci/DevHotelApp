@@ -27,6 +27,7 @@ namespace DevHotelAPI.Contexts
             modelBuilder.Entity<Client>(entity =>
             {
                 entity.Property(p => p.Email).IsRequired();
+                entity.HasIndex(p => p.Email).IsUnique();
                 entity.Property(p => p.Password).IsRequired();
             });
 
@@ -44,12 +45,12 @@ namespace DevHotelAPI.Contexts
                 entity.HasOne(e => e.Type).WithMany()
                 .HasForeignKey(r => r.RoomTypeId)
                 .IsRequired();
-
             });
 
             modelBuilder.Entity<RoomType>(entity =>
             {
                 entity.Property(e => e.Description).IsRequired();
+                entity.HasIndex(e => e.Description).IsUnique(); 
                 entity.Property(e => e.TotalNumber).IsRequired();
                 entity.HasKey(e => e.Id);
             });
@@ -79,8 +80,6 @@ namespace DevHotelAPI.Contexts
         {
             return Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
         }
-        public DbSet<DevHotelAPI.Dtos.ClientDto> ClientDto { get; set; } = default!;
-        public DbSet<DevHotelAPI.Dtos.ReservationDto> ReservationDto { get; set; } = default!;
     }
 
 }
