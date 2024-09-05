@@ -23,7 +23,6 @@ namespace DevHotelAPI.Controllers
             _validator = validator;
         }
 
-        // GET: api/Reservations
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservations()
         {
@@ -32,7 +31,14 @@ namespace DevHotelAPI.Controllers
             return Ok(reservationDtos);
         }
 
-        // GET: api/Reservations/5
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByClientId(Guid clientId)
+        {
+            var reservations = await _repository.GetReservationsByClientIdAsync(clientId);
+
+            return Ok(reservations != null ? _mapper.Map<List<ReservationDto>>(reservations) : null);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservationDto>> GetReservation(Guid id)
         {
@@ -45,7 +51,6 @@ namespace DevHotelAPI.Controllers
             return Ok(reservationDto);
         }
 
-        // PUT: api/Reservations/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(Guid id, ReservationDto reservationDto)
         {
@@ -75,7 +80,6 @@ namespace DevHotelAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Reservations
         [HttpPost]
         public async Task<ActionResult<ReservationDto>> PostReservation(ReservationDto reservationDto)
         {
@@ -91,7 +95,6 @@ namespace DevHotelAPI.Controllers
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
         }
 
-        // DELETE: api/Reservations/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
         {

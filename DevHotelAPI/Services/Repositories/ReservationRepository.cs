@@ -49,6 +49,11 @@ namespace DevHotelAPI.Services.Repositories
         {
             return await _context.Reservations.AnyAsync(e => e.Id == id);
         }
+
+        public async Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId)
+        {
+            return await _context.Reservations.Where(r => r.ClientId.Equals(clientId)).ToListAsync();
+        }
     }
 }
 

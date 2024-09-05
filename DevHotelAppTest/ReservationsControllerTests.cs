@@ -7,6 +7,7 @@ using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -78,16 +79,32 @@ namespace DevHotelAppTest
         }
 
         [Fact]
+        public async Task GetReservationByClientId_ReturnsOkResult_WithListOfReservationDtos()
+        {
+            // Arrange
+            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+
+            // Act
+            var result = await _controller.GetReservationByClientId(clientId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<ReservationDto>>(okResult.Value);
+            Assert.Equal(3, returnValue.Count);
+        }
+
+        [Fact]
         public async Task PutReservation_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
             var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-            var reservationDto = new ReservationDto { 
+            var reservationDto = new ReservationDto
+            {
                 Id = validId,
                 ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
-                RoomNumber = 101                
+                RoomNumber = 101
             };
 
             // Act
@@ -137,6 +154,26 @@ namespace DevHotelAppTest
             var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
             var returnValue = Assert.IsType<ReservationDto>(createdAtActionResult.Value);
             Assert.Equal(reservationDto.Id, returnValue.Id);
+        }
+
+        [Fact]
+        public async Task PostReservation_ReturnsBadRequest_WhenReservationDatesAreNotValid()
+        {
+            // Arrange
+            var reservationDto = new ReservationDto
+            {
+                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                From = DateTime.Now.AddDays(1),
+                To = DateTime.Now,
+                RoomNumber = 102
+            }; ;
+
+            // Act
+            var result = await _controller.PostReservation(reservationDto);
+
+            var actionResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var errorResponse = Assert.IsType<List<ValidationFailure>>(actionResult.Value);
+            Assert.Equal("To date must be later than From date.", errorResponse.Select(e => e.ErrorMessage).Where(m => m == "To date must be later than From date.").FirstOrDefault());
         }
 
         [Fact]

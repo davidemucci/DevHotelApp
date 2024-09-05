@@ -20,6 +20,9 @@ namespace DevHotelAPI.Validators
                 .GreaterThan(DateTime.Now)
                 .WithMessage("To date must be in the future.");
 
+            RuleFor(r => r).Must(r => r.To > r.From)
+            .WithMessage("To date must be later than From date.");
+
             RuleFor(r => r.RoomNumber).NotEmpty()
                 .WithMessage("Room number must not be empty.");
         }
