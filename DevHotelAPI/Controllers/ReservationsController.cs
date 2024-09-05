@@ -39,9 +39,7 @@ namespace DevHotelAPI.Controllers
             var reservation = await _repository.GetReservationByIdAsync(id);
 
             if (reservation == null)
-            {
                 return NotFound();
-            }
 
             var reservationDto = _mapper.Map<ReservationDto>(reservation);
             return Ok(reservationDto);
@@ -52,16 +50,15 @@ namespace DevHotelAPI.Controllers
         public async Task<IActionResult> PutReservation(Guid id, ReservationDto reservationDto)
         {
             if (id != reservationDto.Id)
-            {
                 return BadRequest();
-            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var reservation = _mapper.Map<Reservation>(reservationDto);
 
             if (!_validator.Validate(reservation).IsValid)
-            {
                 return BadRequest(_validator.Validate(reservation).Errors);
-            }
 
             try
             {
@@ -70,13 +67,9 @@ namespace DevHotelAPI.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!await _repository.ReservationExistsAsync(id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return NoContent();
@@ -86,12 +79,13 @@ namespace DevHotelAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservationDto>> PostReservation(ReservationDto reservationDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var reservation = _mapper.Map<Reservation>(reservationDto);
 
             if (!_validator.Validate(reservation).IsValid)
-            {
                 return BadRequest(_validator.Validate(reservation).Errors);
-            }
 
             await _repository.AddReservationAsync(reservation);
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
@@ -103,9 +97,7 @@ namespace DevHotelAPI.Controllers
         {
             var reservation = await _repository.GetReservationByIdAsync(id);
             if (reservation == null)
-            {
                 return NotFound();
-            }
 
             await _repository.DeleteReservationAsync(id);
             return NoContent();

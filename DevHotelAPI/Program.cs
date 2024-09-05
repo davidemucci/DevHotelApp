@@ -32,14 +32,15 @@ builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddAutoMapper(typeof(MainMapperProfile));
 builder.Services.AddScoped<IValidator<RoomType>, RoomTypeValidator>();
 builder.Services.AddScoped<IValidator<Room>, RoomValidator>();
-
+builder.Services.AddScoped<IValidator<Client>, ClientValidator>();
+builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-/*    var context = app.Services.GetRequiredService<HotelDevContext>();
-    context.Database.EnsureCreated();*/
+    /*    var context = app.Services.GetRequiredService<HotelDevContext>();
+        context.Database.EnsureCreated();*/
     app.UseSwagger();
     app.UseSwaggerUI();
 }

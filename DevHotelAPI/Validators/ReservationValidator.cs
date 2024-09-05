@@ -7,14 +7,21 @@ namespace DevHotelAPI.Validators
     {
         public ReservationValidator()
         {
-            RuleFor(r => r.ClientId).NotEmpty();    
+            RuleFor(r => r.ClientId).NotEmpty()
+                .WithMessage("Client ID must not be empty.");
+
             RuleFor(r => r.From).NotEmpty()
-                .GreaterThan(DateTime.Now);
+                .WithMessage("From date must not be empty.")
+                .GreaterThan(DateTime.Now)
+                .WithMessage("From date must be in the future.");
+
             RuleFor(r => r.To).NotEmpty()
-                .GreaterThan(DateTime.Now);
-            RuleFor(r => r.ClientId).NotEmpty();
-            RuleFor(r => r.RoomNumber).NotEmpty();
-            
+                .WithMessage("To date must not be empty.")
+                .GreaterThan(DateTime.Now)
+                .WithMessage("To date must be in the future.");
+
+            RuleFor(r => r.RoomNumber).NotEmpty()
+                .WithMessage("Room number must not be empty.");
         }
     }
 }
