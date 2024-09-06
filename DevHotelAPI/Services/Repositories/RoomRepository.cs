@@ -13,8 +13,13 @@ namespace DevHotelAPI.Services.Repositories
         {
             _context = context;
         }
+        public async Task AddRoomAsync(Room room)
+        {
+            await _context.Rooms.AddAsync(room);
+            await _context.SaveChangesAsync();
+        }
 
-        public async Task<IEnumerable<Room>> GetAllRoomAsync()
+        public async Task<IEnumerable<Room?>> GetAllRoomAsync()
         {
             return await _context.Rooms.ToListAsync();
         }
@@ -24,11 +29,6 @@ namespace DevHotelAPI.Services.Repositories
             return await _context.Rooms.FindAsync(id);
         }
 
-        public async Task AddRoomAsync(Room room)
-        {
-            await _context.Rooms.AddAsync(room);
-            await _context.SaveChangesAsync();
-        }
 
         public async Task UpdateRoomAsync(Room room)
         {

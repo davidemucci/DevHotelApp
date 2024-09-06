@@ -1,6 +1,7 @@
 ﻿using DevHotelAPI.Contexts;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Services.Repositories
@@ -13,6 +14,15 @@ namespace DevHotelAPI.Services.Repositories
         public ReservationRepository(HotelDevContext context)
         {
             _context = context;
+        }
+
+        public async Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation)
+        {
+            return !await _context.Reservations.AnyAsync(r => r.RoomNumber == reservation.RoomNumber &&
+               ((reservation.From >= r.From && reservation.From < r.To) ||
+                (reservation.To > r.From && reservation.To <= r.To) ||
+                (reservation.From <= r.From && reservation.To >= r.To))
+            );
         }
 
         public async Task<IEnumerable<Reservation?>> GetAllReservationsAsync()
@@ -42,7 +52,7 @@ namespace DevHotelAPI.Services.Repositories
             var reservation = await _context.Reservations.FindAsync(id);
             if (reservation != null)
                 _context.Reservations.Remove(reservation);
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ReservationExistsAsync(Guid id)

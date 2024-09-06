@@ -4,6 +4,7 @@ namespace DevHotelAPI.Services.Contracts
 {
     public interface IReservationRepository
     {
+        Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation);    
         Task<IEnumerable<Reservation?>> GetAllReservationsAsync();
         Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId);
         Task<Reservation?> GetReservationByIdAsync(Guid id);

@@ -65,6 +65,9 @@ namespace DevHotelAPI.Controllers
             if (!_validator.Validate(reservation).IsValid)
                 return BadRequest(_validator.Validate(reservation).Errors);
 
+            if (!await _repository.CheckIfRoomIsAvailableAsync(reservation))
+                return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
+
             try
             {
                 await _repository.UpdateReservationAsync(reservation);
@@ -90,6 +93,10 @@ namespace DevHotelAPI.Controllers
 
             if (!_validator.Validate(reservation).IsValid)
                 return BadRequest(_validator.Validate(reservation).Errors);
+
+            if (!await _repository.CheckIfRoomIsAvailableAsync(reservation))
+                return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
+
 
             await _repository.AddReservationAsync(reservation);
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
