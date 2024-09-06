@@ -68,12 +68,13 @@ namespace DevHotelAPI.Services
         {
             var id = 1;
             var total = clientsFaker.Count -1;
+            var roomNumberStart = 100;
             var reservations = new Faker<Reservation>()
                 .RuleFor(r => r.Id, f => Guid.Parse("11111111-1111-1111-1111-11111111111" + id++.ToString()))
-                .RuleFor(r => r.RoomNumber, f => f.Random.Int(100, 100 + totalRooms))
+                .RuleFor(r => r.RoomNumber, f => roomNumberStart++)
                 .RuleFor(r => r.ClientId, i => clientsFaker[i.Random.Int(0, total)]?.Id)
-                .RuleFor(r => r.From, f => f.Date.Future(refDate: new DateTime(2024, 1, 16, 15, 15, 0)))
-                .RuleFor(r => r.From, f => f.Date.Future(refDate: new DateTime(2024, 1, 18, 15, 15, 0)))
+                .RuleFor(r => r.From, f => new DateTime(2027, 1, 16, 15, 15, 0))
+                .RuleFor(r => r.To, f => new DateTime(2027, 1, 18, 15, 15, 0))
                 ;
 
             // var reservationsFaker = reservations.Generate(5);
