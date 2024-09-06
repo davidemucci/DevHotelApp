@@ -13,9 +13,9 @@ namespace DevHotelAppTest
 {
     public class ClientsControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly DatabaseFixture _databaseFixture;
         private readonly HotelDevContext _context;
         private readonly ClientsController _controller;
+        private readonly DatabaseFixture _databaseFixture;
         private readonly IMapper _mapper;
         private readonly IClientRepository _repository;
         private readonly IValidator<Client> _validator;
@@ -33,22 +33,23 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task GetClients_ReturnsAllClients()
+        public async Task DeleteClient_ReturnsNoContent_WhenClientIsDeleted()
         {
+            // Arrange
+            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+
             // Act
-            var result = await _controller.GetClients();
+            var result = await _controller.DeleteClient(clientId);
 
             // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<List<ClientDto>>(okResult.Value);
-            Assert.Equal(2, returnValue.Count); 
+            Assert.IsType<NoContentResult>(result);
         }
 
         [Fact]
         public async Task GetClient_ReturnsClient_WhenClientExists()
         {
             // Arrange
-            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221"); 
+            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
 
             // Act
             var result = await _controller.GetClient(clientId);
@@ -73,26 +74,16 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task PutClient_ReturnsNoContent_WhenUpdateIsSuccessful()
+        public async Task GetClients_ReturnsAllClients()
         {
-            // Arrange
-            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
-            var clientDto = new ClientDto { 
-                Id = clientId, 
-                Name = "Updated Client",
-                Email = "newclientemail@email.com",
-                Password = "password1234!",
-                Address = "via cipressi 12, Milano, Italia"
-            
-            };
-
             // Act
-            var result = await _controller.PutClient(clientId, clientDto);
+            var result = await _controller.GetClients();
 
             // Assert
-            Assert.IsType<NoContentResult>(result);
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<ClientDto>>(okResult.Value);
+            Assert.Equal(2, returnValue.Count); 
         }
-
         [Fact]
         public async Task PostClient_CreatesClient_WhenModelIsValid()
         {
@@ -117,13 +108,21 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task DeleteClient_ReturnsNoContent_WhenClientIsDeleted()
+        public async Task PutClient_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
             var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var clientDto = new ClientDto { 
+                Id = clientId, 
+                Name = "Updated Client",
+                Email = "newclientemail@email.com",
+                Password = "password1234!",
+                Address = "via cipressi 12, Milano, Italia"
+            
+            };
 
             // Act
-            var result = await _controller.DeleteClient(clientId);
+            var result = await _controller.PutClient(clientId, clientDto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);

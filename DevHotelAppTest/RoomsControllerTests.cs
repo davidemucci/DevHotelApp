@@ -18,9 +18,9 @@ namespace DevHotelAppTest
 {
     public class RoomsControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly DatabaseFixture _databaseFixture;
         private readonly HotelDevContext _context;
         private readonly RoomsController _controller;
+        private readonly DatabaseFixture _databaseFixture;
         private readonly IMapper _mapper;
         private readonly IRoomRepository _repository;
         private readonly IValidator<Room> _validator;
@@ -35,6 +35,59 @@ namespace DevHotelAppTest
             _repository = new RoomRepository(_context);
             _validator = new RoomValidator();
             _controller = new RoomsController(_mapper, _repository, _validator);
+        }
+
+        [Fact]
+        public async Task DeleteRoom_ReturnsNoContent_WhenRoomIsDeleted()
+        {
+            // Arrange
+            var roomId = 100;
+
+            // Act
+            var result = await _controller.DeleteRoom(roomId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task GetRoom_ReturnsNotFound_WhenRoomDoesNotExist()
+        {
+            // Arrange
+            var roomId = 999;
+
+            // Act
+            var result = await _controller.GetRoom(roomId);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetRoom_ReturnsRoom_WhenRoomExists()
+        {
+            // Arrange
+            var roomId = 100;
+
+            // Act
+            var result = await _controller.GetRoom(roomId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<RoomDto>(okResult.Value);
+            Assert.Equal(roomId, returnValue.Number);
+        }
+
+        [Fact]
+        public async Task GetRooms_ReturnsAllRooms()
+        {
+            // Act
+            var result = await _controller.GetRooms();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<RoomDto>>(okResult.Value);
+            Assert.Equal(10, returnValue.Count);
         }
 
         [Fact]
@@ -105,62 +158,6 @@ namespace DevHotelAppTest
             var returnValue = Assert.IsType<List<IGrouping<int?, RoomDto>>>(okResult.Value);
             Assert.Equal(3, returnValue.Sum(g => g.Count()));
         }
-
-
-        [Fact]
-        public async Task GetRooms_ReturnsAllRooms()
-        {
-            // Act
-            var result = await _controller.GetRooms();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<List<RoomDto>>(okResult.Value);
-            Assert.Equal(10, returnValue.Count);
-        }
-
-        [Fact]
-        public async Task GetRoom_ReturnsRoom_WhenRoomExists()
-        {
-            // Arrange
-            var roomId = 100;
-
-            // Act
-            var result = await _controller.GetRoom(roomId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<RoomDto>(okResult.Value);
-            Assert.Equal(roomId, returnValue.Number);
-        }
-
-        [Fact]
-        public async Task GetRoom_ReturnsNotFound_WhenRoomDoesNotExist()
-        {
-            // Arrange
-            var roomId = 999;
-
-            // Act
-            var result = await _controller.GetRoom(roomId);
-
-            // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
-        }
-
-        [Fact]
-        public async Task PutRoom_ReturnsNoContent_WhenUpdateIsSuccessful()
-        {
-            // Arrange
-            var roomId = 100;
-            var roomDto = new RoomDto { Number = roomId, Description = "Updated Room", RoomTypeId = 2 };
-
-            // Act
-            var result = await _controller.PutRoom(roomId, roomDto);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
-
         [Fact]
         public async Task PostRoom_CreatesRoom_WhenModelIsValid()
         {
@@ -177,13 +174,14 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task DeleteRoom_ReturnsNoContent_WhenRoomIsDeleted()
+        public async Task PutRoom_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
             var roomId = 100;
+            var roomDto = new RoomDto { Number = roomId, Description = "Updated Room", RoomTypeId = 2 };
 
             // Act
-            var result = await _controller.DeleteRoom(roomId);
+            var result = await _controller.PutRoom(roomId, roomDto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);

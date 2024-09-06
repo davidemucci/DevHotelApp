@@ -14,12 +14,46 @@ namespace DevHotelAppTest
 {
     public class DatabaseFixture : IAsyncLifetime
     {
-        public HotelDevContext _context { get; private set; }
         private IBogusRepository _bogusRepo;
-
         public DatabaseFixture()
         {
-            
+
+        }
+
+        public HotelDevContext _context { get; private set; }
+        public void DetachAllEntities()
+        {
+            var changedEntriesCopy = _context.ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added ||
+                            e.State == EntityState.Modified ||
+                            e.State == EntityState.Deleted ||
+                            e.State == EntityState.Unchanged)
+                .ToList();
+
+            foreach (var entry in changedEntriesCopy)
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
+
+        public async Task DisposeAsync()
+        {
+            _context.Database.EnsureDeleted();
+            await _context.DisposeAsync();
+        }
+
+        public IMapper GetMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<MainMapperProfile>();
+            });
+            return config.CreateMapper();
+        }
+
+        public async Task InitializeAsync()
+        {
+            await ResetContext();
         }
 
         public async Task ResetContext()
@@ -49,41 +83,6 @@ namespace DevHotelAppTest
             await _context.AddRangeAsync(reservationsFaker);
             await _context.SaveChangesAsync();
             DetachAllEntities();
-        }
-
-        public void DetachAllEntities()
-        {
-            var changedEntriesCopy = _context.ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added ||
-                            e.State == EntityState.Modified ||
-                            e.State == EntityState.Deleted || 
-                            e.State == EntityState.Unchanged)
-                .ToList();
-
-            foreach (var entry in changedEntriesCopy)
-            {
-                entry.State = EntityState.Detached;
-            }
-        }
-
-        public IMapper GetMapper()
-        {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<MainMapperProfile>();
-            });
-            return config.CreateMapper();
-        }
-
-        public async Task InitializeAsync()
-        {
-             await ResetContext();
-        }
-
-        public async Task DisposeAsync()
-        {
-            _context.Database.EnsureDeleted();
-            await _context.DisposeAsync();
         }
     }
 }

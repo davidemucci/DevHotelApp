@@ -10,15 +10,33 @@ namespace DevHotelAPI.Contexts
 {
     public class HotelDevContext : DbContext
     {
-        private IBogusRepository _bogusRepo {  get; set; }
+        public HotelDevContext(DbContextOptions options, IBogusRepository bogusRepo) : base(options)
+        {
+            _bogusRepo = bogusRepo;
+        }
+
         public DbSet<Client> Clients { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
-
-        public HotelDevContext(DbContextOptions options, IBogusRepository bogusRepo) : base(options)
+        private IBogusRepository _bogusRepo { get; set; }
+        public void DbInitialize(ModelBuilder modelBuilder)
         {
-            _bogusRepo = bogusRepo;
+            var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
+            var roomsFaker = _bogusRepo.GenerateRooms(4, 10);
+            var clientsFaker = _bogusRepo.GenerateClients();
+            var reservationsFaker = _bogusRepo.GenerateReservations(clientsFaker);
+
+            modelBuilder.Entity<RoomType>().HasData(roomTypesFaker);
+            modelBuilder.Entity<Room>().HasData(roomsFaker);
+            modelBuilder.Entity<Client>().HasData(clientsFaker);
+            modelBuilder.Entity<Reservation>().HasData(reservationsFaker);
+
+        }
+
+        public bool IsInMemoryDatabase()
+        {
+            return Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -61,25 +79,6 @@ namespace DevHotelAPI.Contexts
 
             base.OnModelCreating(modelBuilder);
 
-        }
-
-        public void DbInitialize(ModelBuilder modelBuilder)
-        {
-            var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
-            var roomsFaker = _bogusRepo.GenerateRooms(4,10);
-            var clientsFaker = _bogusRepo.GenerateClients();
-            var reservationsFaker = _bogusRepo.GenerateReservations(clientsFaker);
-
-            modelBuilder.Entity<RoomType>().HasData(roomTypesFaker);
-            modelBuilder.Entity<Room>().HasData(roomsFaker);
-            modelBuilder.Entity<Client>().HasData(clientsFaker);
-            modelBuilder.Entity<Reservation>().HasData(reservationsFaker);
-
-        }
-
-        public bool IsInMemoryDatabase()
-        {
-            return Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
         }
     }
 

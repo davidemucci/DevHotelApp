@@ -14,26 +14,15 @@ namespace DevHotelAPI.Services.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Client?>> GetAllClientsAsync()
-        {
-            return await _context.Clients.ToListAsync();
-        }
-
-        public async Task<Client?> GetClientByIdAsync(Guid id)
-        {
-            return await _context.Clients.FindAsync(id);
-        }
-
         public async Task AddClientAsync(Client client)
         {
             await _context.Clients.AddAsync(client);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateClientAsync(Client client)
+        public async Task<bool> ClientExistsAsync(Guid id)
         {
-            _context.Entry(client).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            return await _context.Clients.AnyAsync(e => e.Id == id);
         }
 
         public async Task DeleteClientAsync(Guid id)
@@ -46,11 +35,20 @@ namespace DevHotelAPI.Services.Repositories
             }
         }
 
-        public async Task<bool> ClientExistsAsync(Guid id)
+        public async Task<IEnumerable<Client?>> GetAllClientsAsync()
         {
-            return await _context.Clients.AnyAsync(e => e.Id == id);
+            return await _context.Clients.ToListAsync();
         }
 
+        public async Task<Client?> GetClientByIdAsync(Guid id)
+        {
+            return await _context.Clients.FindAsync(id);
+        }
+        public async Task UpdateClientAsync(Client client)
+        {
+            _context.Entry(client).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
     }
 
 }

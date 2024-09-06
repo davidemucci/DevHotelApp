@@ -18,10 +18,9 @@ namespace DevHotelAPI.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IClientRepository _repository;
         private readonly IValidator<Client> _validator;
-        private readonly IMapper _mapper;
-
         public ClientsController(IMapper mapper, IClientRepository repository, IValidator<Client> validator)
         {
             _mapper = mapper;
@@ -29,12 +28,15 @@ namespace DevHotelAPI.Controllers
             _validator = validator;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClientDto>>> GetClients()
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteClient(Guid id)
         {
-            var clients = await _repository.GetAllClientsAsync();
-            var clientDtos = _mapper.Map<IEnumerable<ClientDto>>(clients);
-            return Ok(clientDtos);
+            var client = await _repository.GetClientByIdAsync(id);
+            if (client == null)
+                return NotFound();
+
+            await _repository.DeleteClientAsync(id);
+            return NoContent();
         }
 
         [HttpGet("{id}")]
@@ -47,6 +49,25 @@ namespace DevHotelAPI.Controllers
 
             var clientDto = _mapper.Map<ClientDto>(client);
             return Ok(clientDto);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ClientDto>>> GetClients()
+        {
+            var clients = await _repository.GetAllClientsAsync();
+            var clientDtos = _mapper.Map<IEnumerable<ClientDto>>(clients);
+            return Ok(clientDtos);
+        }
+        [HttpPost]
+        public async Task<ActionResult<ClientDto>> PostClient(ClientDto clientDto)
+        {
+            var client = _mapper.Map<Client>(clientDto);
+
+            if (!_validator.Validate(client).IsValid)
+                return BadRequest(_validator.Validate(client).Errors);
+
+            await _repository.AddClientAsync(client);
+            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, clientDto);
         }
 
         [HttpPut("{id}")]
@@ -75,29 +96,6 @@ namespace DevHotelAPI.Controllers
                     throw;
             }
 
-            return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<ClientDto>> PostClient(ClientDto clientDto)
-        {
-            var client = _mapper.Map<Client>(clientDto);
-
-            if (!_validator.Validate(client).IsValid)
-                return BadRequest(_validator.Validate(client).Errors);
-
-            await _repository.AddClientAsync(client);
-            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, clientDto);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClient(Guid id)
-        {
-            var client = await _repository.GetClientByIdAsync(id);
-            if (client == null)
-                return NotFound();
-
-            await _repository.DeleteClientAsync(id);
             return NoContent();
         }
     }

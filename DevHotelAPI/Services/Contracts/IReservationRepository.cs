@@ -4,13 +4,13 @@ namespace DevHotelAPI.Services.Contracts
 {
     public interface IReservationRepository
     {
-        Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation);    
-        Task<IEnumerable<Reservation?>> GetAllReservationsAsync();
-        Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId);
-        Task<Reservation?> GetReservationByIdAsync(Guid id);
         Task AddReservationAsync(Reservation reservation);
-        Task UpdateReservationAsync(Reservation reservation);
+        Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation);
         Task DeleteReservationAsync(Guid id);
+        Task<IEnumerable<Reservation?>> GetAllReservationsAsync();
+        Task<Reservation?> GetReservationByIdAsync(Guid id);
+        Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId);
         Task<bool> ReservationExistsAsync(Guid id);
+        Task UpdateReservationAsync(Reservation reservation);
     }
 }

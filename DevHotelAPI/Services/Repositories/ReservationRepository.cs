@@ -16,12 +16,26 @@ namespace DevHotelAPI.Services.Repositories
             _context = context;
         }
 
+        public async Task AddReservationAsync(Reservation reservation)
+        {
+            await _context.Reservations.AddAsync(reservation);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation)
         {
             return !await _context.Reservations.AnyAsync(r => 
                 r.RoomNumber == reservation.RoomNumber &&
                 (reservation.From < r.To && reservation.To > r.From)
             );
+        }
+
+        public async Task DeleteReservationAsync(Guid id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation != null)
+                _context.Reservations.Remove(reservation);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Reservation?>> GetAllReservationsAsync()
@@ -33,25 +47,9 @@ namespace DevHotelAPI.Services.Repositories
         {
             return await _context.Reservations.FindAsync(id);
         }
-
-        public async Task AddReservationAsync(Reservation reservation)
+        public async Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId)
         {
-            await _context.Reservations.AddAsync(reservation);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateReservationAsync(Reservation reservation)
-        {
-            _context.Entry(reservation).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteReservationAsync(Guid id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation != null)
-                _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+            return await _context.Reservations.Where(r => r.ClientId.Equals(clientId)).ToListAsync();
         }
 
         public async Task<bool> ReservationExistsAsync(Guid id)
@@ -59,9 +57,10 @@ namespace DevHotelAPI.Services.Repositories
             return await _context.Reservations.AnyAsync(e => e.Id == id);
         }
 
-        public async Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId)
+        public async Task UpdateReservationAsync(Reservation reservation)
         {
-            return await _context.Reservations.Where(r => r.ClientId.Equals(clientId)).ToListAsync();
+            _context.Entry(reservation).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
     }
 }

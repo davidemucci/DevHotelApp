@@ -54,6 +54,15 @@ namespace DevHotelAPI.Controllers
             var rooms = await _repository.GetAllRoomAsync();
             return Ok(_mapper.Map<List<RoomDto>>(rooms));
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<IGrouping<int, Room>>>> GetRoomsAvailable(DateTime from, DateTime to, int people)
+        {
+            var rooms = await _repository.GetAllRoomsAvailableAsync(from, to, people);
+            var roomsDto = _mapper.Map<List<RoomDto>>(rooms);
+
+            return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
+        }
+
         [HttpPost]
         public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
         {
@@ -68,16 +77,6 @@ namespace DevHotelAPI.Controllers
             await _repository.AddRoomAsync(room);
             return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
         }
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<IGrouping<int, Room>>>> GetRoomsAvailable(DateTime from, DateTime to, int people)
-        {
-            var rooms = await _repository.GetAllRoomsAvailableAsync(from, to, people);
-            var roomsDto = _mapper.Map<List<RoomDto>>(rooms);
-
-            return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
-        }
-
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRoom(int id, RoomDto roomDto)
         {

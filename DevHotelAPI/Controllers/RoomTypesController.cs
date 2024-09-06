@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 [Route("api/[controller]")]
 public class RoomTypesController : ControllerBase
 {
-    private readonly IRoomTypeRepository _roomTypeRepository;
     private readonly IMapper _mapper;
+    private readonly IRoomTypeRepository _roomTypeRepository;
     private readonly IValidator<RoomType> _validator;
 
 
@@ -22,11 +22,11 @@ public class RoomTypesController : ControllerBase
         _validator = validator;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<RoomType>>> GetRoomTypes()
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteRoomType(int id)
     {
-        var roomTypes = await _roomTypeRepository.GetAllRoomTypesAsync();
-        return Ok(roomTypes);
+        await _roomTypeRepository.DeleteRoomTypeAsync(id);
+        return NoContent();
     }
 
     [HttpGet("{id}")]
@@ -37,6 +37,28 @@ public class RoomTypesController : ControllerBase
             return NotFound();
 
         return Ok(roomType);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<RoomType>>> GetRoomTypes()
+    {
+        var roomTypes = await _roomTypeRepository.GetAllRoomTypesAsync();
+        return Ok(roomTypes);
+    }
+    [HttpPost]
+    public async Task<ActionResult<RoomType>> PostRoomType(RoomTypeDto roomTypeDto)
+    {
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var roomType = _mapper.Map<RoomType>(roomTypeDto);
+
+        if (!_validator.Validate(roomType).IsValid)
+            return BadRequest(_validator.Validate(roomType).Errors);
+
+        await _roomTypeRepository.AddRoomTypeAsync(roomType);
+        return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
     }
 
     [HttpPut("{id}")]
@@ -63,29 +85,6 @@ public class RoomTypesController : ControllerBase
                 throw;
         }
 
-        return NoContent();
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<RoomType>> PostRoomType(RoomTypeDto roomTypeDto)
-    {
-
-        if(!ModelState.IsValid) 
-            return BadRequest(ModelState);
-        
-        var roomType = _mapper.Map<RoomType>(roomTypeDto);
-
-        if (!_validator.Validate(roomType).IsValid)
-            return BadRequest(_validator.Validate(roomType).Errors);
-
-        await _roomTypeRepository.AddRoomTypeAsync(roomType);
-        return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteRoomType(int id)
-    {
-        await _roomTypeRepository.DeleteRoomTypeAsync(id);
         return NoContent();
     }
 }
