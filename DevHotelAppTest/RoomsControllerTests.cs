@@ -38,6 +38,76 @@ namespace DevHotelAppTest
         }
 
         [Fact]
+        public async Task GetRoomsAvailable_ReturnsAvailableRooms_WhenRoomsExistAndDateAreAvailable()
+        {
+            // Arrange
+            var fromDate = new DateTime(2024, 9, 1);
+            var toDate = new DateTime(2024, 9, 10);
+            var people = 2;
+
+            // Act
+            var result = await _controller.GetRoomsAvailable(fromDate, toDate, people);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<IGrouping<int?, RoomDto>>>(okResult.Value);
+            Assert.Equal(9, returnValue.Sum(x => x.Count()));
+        }
+
+        [Fact]
+        public async Task GetRoomsAvailable_ReturnsAvailableRooms_WhenRoomsExistAndDateAreAvailable2()
+        {
+            // Arrange
+            var fromDate = new DateTime(2024, 9, 1);
+            var toDate = new DateTime(2024, 9, 10);
+            var people = 4;
+
+            // Act
+            var result = await _controller.GetRoomsAvailable(fromDate, toDate, people);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<IGrouping<int?, RoomDto>>>(okResult.Value);
+            Assert.Equal(5, returnValue.Sum(g => g.Count()));
+        }
+
+
+        [Fact]
+        public async Task GetRoomsAvailable_ReturnsNoRooms_WhenRoomsExistAndDateArentAvailable()
+        {
+            // Arrange
+            var fromDate = new DateTime(2027, 1, 16, 15, 0, 0);
+            var toDate = new DateTime(2027, 1, 18, 15, 0, 0);
+            var people = 2;
+
+            // Act
+            var result = await _controller.GetRoomsAvailable(fromDate, toDate, people);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<IGrouping<int?, RoomDto>>>(okResult.Value);
+            Assert.Equal(5, returnValue.Sum(x => x.Count()));
+        }
+
+        [Fact]
+        public async Task GetRoomsAvailable_ReturnsNoRooms_WhenRoomsExistAndDateArentAvailable2()
+        {
+            // Arrange
+            var fromDate = new DateTime(2027, 1, 16, 15, 0, 0);
+            var toDate = new DateTime(2027, 1, 18, 15, 0, 0);
+            var people = 4;
+
+            // Act
+            var result = await _controller.GetRoomsAvailable(fromDate, toDate, people);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnValue = Assert.IsType<List<IGrouping<int?, RoomDto>>>(okResult.Value);
+            Assert.Equal(3, returnValue.Sum(g => g.Count()));
+        }
+
+
+        [Fact]
         public async Task GetRooms_ReturnsAllRooms()
         {
             // Act
@@ -81,7 +151,7 @@ namespace DevHotelAppTest
         public async Task PutRoom_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var roomId = 100; 
+            var roomId = 100;
             var roomDto = new RoomDto { Number = roomId, Description = "Updated Room", RoomTypeId = 2 };
 
             // Act

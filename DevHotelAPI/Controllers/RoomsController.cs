@@ -5,6 +5,7 @@ using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using AutoMapper;
 using DevHotelAPI.Dtos;
+using System.Collections.Generic;
 
 namespace DevHotelAPI.Controllers
 {
@@ -12,10 +13,9 @@ namespace DevHotelAPI.Controllers
     [ApiController]
     public class RoomsController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IRoomRepository _repository;
         private readonly IValidator<Room> _validator;
-        private readonly IMapper _mapper;
-
         public RoomsController(IMapper mapper, IRoomRepository repository, IValidator<Room> validator)
         {
             _mapper = mapper;
@@ -24,11 +24,17 @@ namespace DevHotelAPI.Controllers
 
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms()
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRoom(int id)
         {
-            var rooms = await _repository.GetAllRoomAsync();
-            return Ok(_mapper.Map<List<RoomDto>>(rooms));
+            var room = await _repository.GetByIdRoomAsync(id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            await _repository.DeleteRoomAsync(id);
+            return NoContent();
         }
 
         [HttpGet("{id}")]
@@ -40,6 +46,36 @@ namespace DevHotelAPI.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<RoomDto>(room));
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms()
+        {
+            var rooms = await _repository.GetAllRoomAsync();
+            return Ok(_mapper.Map<List<RoomDto>>(rooms));
+        }
+        [HttpPost]
+        public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var room = _mapper.Map<Room>(roomDto);
+
+            if (!_validator.Validate(room).IsValid)
+                return BadRequest(_validator.Validate(room).Errors);
+
+            await _repository.AddRoomAsync(room);
+            return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<IGrouping<int, Room>>>> GetRoomsAvailable(DateTime from, DateTime to, int people)
+        {
+            var rooms = await _repository.GetAllRoomsAvailableAsync(from, to, people);
+            var roomsDto = _mapper.Map<List<RoomDto>>(rooms);
+
+            return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
         }
 
         [HttpPut("{id}")]
@@ -70,35 +106,6 @@ namespace DevHotelAPI.Controllers
 
             return NoContent();
         }
-
-        [HttpPost]
-        public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var room = _mapper.Map<Room>(roomDto);
-
-            if (!_validator.Validate(room).IsValid)
-                return BadRequest(_validator.Validate(room).Errors);
-
-            await _repository.AddRoomAsync(room);
-            return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRoom(int id)
-        {
-            var room = await _repository.GetByIdRoomAsync(id);
-            if (room == null)
-            {
-                return NotFound();
-            }
-
-            await _repository.DeleteRoomAsync(id);
-            return NoContent();
-        }
-
         private async Task<bool> RoomExists(int id)
         {
             var room = await _repository.GetByIdRoomAsync(id);

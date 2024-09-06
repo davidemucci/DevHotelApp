@@ -20,11 +20,13 @@ namespace DevHotelAPI.Services
             var id = 1;
             var count = 0;
             var descRoomTypes = new List<string>() { "Room", "TwinRoom", "Triple", "Suite" };
+            var capacity = 1;
 
             var SeededOrder = new Random(12345);
 
             var roomTypes = new Faker<RoomType>()
                 .RuleFor(r => r.Id, f => id++)
+                .RuleFor(r => r.Capacity, f => capacity++)
                 .RuleFor(r => r.Description, f => descRoomTypes[count++])
                 .RuleFor(r => r.TotalNumber, f => f.Random.Int(1, 50));
 

@@ -18,10 +18,9 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation)
         {
-            return !await _context.Reservations.AnyAsync(r => r.RoomNumber == reservation.RoomNumber &&
-               ((reservation.From >= r.From && reservation.From < r.To) ||
-                (reservation.To > r.From && reservation.To <= r.To) ||
-                (reservation.From <= r.From && reservation.To >= r.To))
+            return !await _context.Reservations.AnyAsync(r => 
+                r.RoomNumber == reservation.RoomNumber &&
+                (reservation.From < r.To && reservation.To > r.From)
             );
         }
 

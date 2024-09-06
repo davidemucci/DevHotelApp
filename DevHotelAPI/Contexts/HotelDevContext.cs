@@ -52,6 +52,7 @@ namespace DevHotelAPI.Contexts
                 entity.Property(e => e.Description).IsRequired();
                 entity.HasIndex(e => e.Description).IsUnique(); 
                 entity.Property(e => e.TotalNumber).IsRequired();
+                entity.Property(e => e.Capacity).IsRequired();
                 entity.HasKey(e => e.Id);
             });
 
