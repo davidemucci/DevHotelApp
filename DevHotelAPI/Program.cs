@@ -14,6 +14,12 @@ using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using System.Configuration;
+using DevHotelAPI.Entities.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +32,48 @@ builder.Services.AddControllers(opt => opt.RespectBrowserAcceptHeader = true)
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
-    builder.Configuration.GetConnectionString("HotelDevConnectionString")));
+    builder.Configuration.GetConnectionString("HotelDevConnectionString"))
+);
+
+/*builder.Services.AddDbContext<IdentityContext>();*/
+builder.Services.AddDbContext<IdentityContext>(opt => opt.UseSqlServer(
+    builder.Configuration.GetConnectionString("IdentityHotelDevConnectionString"))
+
+);
+
+
+builder.Services.AddIdentity<UserProfile, IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<IdentityContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opt =>
+{
+    var secret = builder.Configuration["JwtConfig:Secret"];
+    var issuer = builder.Configuration["JwtConfig:ValidIssuer"];
+    var audience = builder.Configuration["JwtConfig:ValidAudiences"];
+
+    if (secret is null || issuer is null || audience is null)
+        throw new ApplicationException("JWT is not set in the configuration");
+
+    opt.SaveToken = true;
+    opt.RequireHttpsMetadata = false;
+    opt.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidAudience = audience,
+        ValidIssuer = issuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+    };
+} );
+
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
@@ -53,6 +99,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

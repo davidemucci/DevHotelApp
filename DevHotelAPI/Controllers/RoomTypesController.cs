@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/room-types")]
 public class RoomTypesController : ControllerBase
 {
     private readonly IMapper _mapper;

@@ -13,7 +13,6 @@ namespace DevHotelAPI.Validators
                 .MaximumLength(50)
                 .EmailAddress()
                 .NotEmpty();
-            RuleFor(c => c.Password).MinimumLength(8);
         }
 
     }

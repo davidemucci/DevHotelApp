@@ -15,7 +15,7 @@ namespace DevHotelAPI.Services
             var customer = new Faker<Customer>()
                 .RuleFor(r => r.Id, f => Guid.Parse("22222222-2222-2222-2222-22222222222" + id++.ToString()))
                 .RuleFor(r => r.Email, f => f.Internet.Email())
-                .RuleFor(r => r.Password, f => f.Internet.Password())
+                .RuleFor(r => r.ProfileId, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + id++.ToString()))
                 .RuleFor(r => r.Address, f => f.Address.StreetAddress()
                 );
 

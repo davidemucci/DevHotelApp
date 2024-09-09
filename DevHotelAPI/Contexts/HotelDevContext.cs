@@ -10,7 +10,7 @@ namespace DevHotelAPI.Contexts
 {
     public class HotelDevContext : DbContext
     {
-        public HotelDevContext(DbContextOptions options, IBogusRepository bogusRepo) : base(options)
+        public HotelDevContext(DbContextOptions<HotelDevContext> options, IBogusRepository bogusRepo) : base(options)
         {
             _bogusRepo = bogusRepo;
         }
@@ -46,7 +46,7 @@ namespace DevHotelAPI.Contexts
             {
                 entity.Property(p => p.Email).IsRequired();
                 entity.HasIndex(p => p.Email).IsUnique();
-                entity.Property(p => p.Password).IsRequired();
+                entity.HasOne(p => p.Profile);
             });
 
             modelBuilder.Entity<Reservation>(entity =>

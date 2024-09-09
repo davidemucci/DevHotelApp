@@ -46,6 +46,7 @@ namespace DevHotelAPI.Controllers
         }
 
         [HttpGet]
+        [Route("get-reservation-by-customer-id")]
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByCustomerId(Guid customerId)
         {
             var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId);

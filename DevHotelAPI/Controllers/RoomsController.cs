@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace DevHotelAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/rooms")]
     [ApiController]
     public class RoomsController : ControllerBase
     {
@@ -54,7 +54,9 @@ namespace DevHotelAPI.Controllers
             var rooms = await _repository.GetAllRoomAsync();
             return Ok(_mapper.Map<List<RoomDto>>(rooms));
         }
+
         [HttpGet]
+        [Route("get-available-rooms")]
         public async Task<ActionResult<IEnumerable<IGrouping<int, Room>>>> GetRoomsAvailable(DateTime from, DateTime to, int people)
         {
             var rooms = await _repository.GetAllRoomsAvailableAsync(from, to, people);
