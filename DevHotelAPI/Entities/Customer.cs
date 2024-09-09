@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DevHotelAPI.Entities
 {
-    public class Customer { 
+    public class Customer
+    {
         public Guid Id { get; set; }
-        public Guid ProfileId { get; set; }
-        public UserProfile? Profile { get; set; }    
-        public string Email {  get; set; }
+        public Guid IdentityUserId { get; set; }
+        public string Email { get; set; }
         public string? Address { get; set; }
         public string? Name { get; set; }
         public List<Reservation>? Reservations { get; set; }

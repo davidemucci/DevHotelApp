@@ -20,6 +20,7 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using DevHotelAPI.Entities.Identity;
+using DevHotelAPI.Contexts.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +45,7 @@ builder.Services.AddDbContext<IdentityContext>(opt => opt.UseSqlServer(
 );
 
 
-builder.Services.AddIdentity<UserProfile, IdentityRole<Guid>>()
+builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<IdentityContext>()
     .AddDefaultTokenProviders();
 

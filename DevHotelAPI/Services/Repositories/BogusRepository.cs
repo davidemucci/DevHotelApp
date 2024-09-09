@@ -1,6 +1,8 @@
 ﻿using Bogus;
 using DevHotelAPI.Entities;
+using DevHotelAPI.Entities.Identity;
 using DevHotelAPI.Services.Contracts;
+using Microsoft.AspNetCore.Identity;
 
 namespace DevHotelAPI.Services
 {
@@ -9,13 +11,33 @@ namespace DevHotelAPI.Services
         public readonly Guid idCustomer = Guid.Parse("11111111-1111-1111-1111-111111111111");
         public readonly Guid idReservation = Guid.Parse("22222222-2222-2222-2222-222222222222");
         private int totalRooms {  get; set; }
+
+        public List<IdentityUser<Guid>> GenerateUsers()
+        {
+            var id = 1;
+            var userFaker = new Faker<IdentityUser<Guid>>()
+            .RuleFor(u => u.Id, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + id++.ToString()))
+            .RuleFor(u => u.UserName, f => f.Internet.UserName())
+            .RuleFor(u => u.Email, f => f.Internet.Email())
+            .RuleFor(u => u.PhoneNumber, f => f.Phone.PhoneNumber());
+
+            var usersFaker = Enumerable.Range(1, 2)
+                .Select(i => SeedRow(userFaker, i))
+                .ToList();
+
+            return usersFaker;
+        }
+
+        
+
         public List<Customer> GenerateCustomers()
         {
             var id = 1;
+            var idUser = 1;
             var customer = new Faker<Customer>()
                 .RuleFor(r => r.Id, f => Guid.Parse("22222222-2222-2222-2222-22222222222" + id++.ToString()))
                 .RuleFor(r => r.Email, f => f.Internet.Email())
-                .RuleFor(r => r.ProfileId, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + id++.ToString()))
+                .RuleFor(r => r.IdentityUserId, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + idUser++.ToString()))
                 .RuleFor(r => r.Address, f => f.Address.StreetAddress()
                 );
 

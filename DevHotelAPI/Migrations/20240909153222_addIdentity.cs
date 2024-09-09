@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DevHotelAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class fromClientToCustomerEntity : Migration
+    public partial class addIdentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,10 +35,10 @@ namespace DevHotelAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentityUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -48,11 +48,11 @@ namespace DevHotelAPI.Migrations
 
             migrationBuilder.InsertData(
                 table: "Customers",
-                columns: new[] { "Id", "Address", "Email", "Name", "Password", "Surname" },
+                columns: new[] { "Id", "Address", "Email", "IdentityUserId", "Name", "Surname" },
                 values: new object[,]
                 {
-                    { new Guid("22222222-2222-2222-2222-222222222221"), "76098 Torphy Overpass", "Bernita_Konopelski43@gmail.com", null, "Ay7ZbbzDk0", null },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "699 Walter Corners", "Guillermo.Cummerata30@hotmail.com", null, "lJ5hPDb6ee", null }
+                    { new Guid("22222222-2222-2222-2222-222222222221"), "239 Lucy Burg", "Bernita_Konopelski43@gmail.com", new Guid("99999999-9999-9999-9999-999999999991"), null, null },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "0053 Adelle Spring", "Guillermo.Cummerata30@hotmail.com", new Guid("99999999-9999-9999-9999-999999999992"), null, null }
                 });
 
             migrationBuilder.CreateIndex(

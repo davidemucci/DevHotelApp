@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHotelAPI.Migrations
 {
     [DbContext(typeof(HotelDevContext))]
-    [Migration("20240909100608_fromClientToCustomerEntity")]
-    partial class fromClientToCustomerEntity
+    [Migration("20240909153222_addIdentity")]
+    partial class addIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,11 +38,10 @@ namespace DevHotelAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("IdentityUserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
@@ -59,16 +58,16 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222221"),
-                            Address = "76098 Torphy Overpass",
+                            Address = "239 Lucy Burg",
                             Email = "Bernita_Konopelski43@gmail.com",
-                            Password = "Ay7ZbbzDk0"
+                            IdentityUserId = new Guid("99999999-9999-9999-9999-999999999991")
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Address = "699 Walter Corners",
+                            Address = "0053 Adelle Spring",
                             Email = "Guillermo.Cummerata30@hotmail.com",
-                            Password = "lJ5hPDb6ee"
+                            IdentityUserId = new Guid("99999999-9999-9999-9999-999999999992")
                         });
                 });
 

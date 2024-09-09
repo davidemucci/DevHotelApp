@@ -5,6 +5,7 @@ using DevHotelAPI.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 using DevHotelAPI.Dtos;
+using Microsoft.AspNetCore.Identity;
 
 namespace DevHotelAPI.Contexts
 {
@@ -46,7 +47,6 @@ namespace DevHotelAPI.Contexts
             {
                 entity.Property(p => p.Email).IsRequired();
                 entity.HasIndex(p => p.Email).IsUnique();
-                entity.HasOne(p => p.Profile);
             });
 
             modelBuilder.Entity<Reservation>(entity =>
@@ -68,7 +68,7 @@ namespace DevHotelAPI.Contexts
             modelBuilder.Entity<RoomType>(entity =>
             {
                 entity.Property(e => e.Description).IsRequired();
-                entity.HasIndex(e => e.Description).IsUnique(); 
+                entity.HasIndex(e => e.Description).IsUnique();
                 entity.Property(e => e.TotalNumber).IsRequired();
                 entity.Property(e => e.Capacity).IsRequired();
                 entity.HasKey(e => e.Id);
