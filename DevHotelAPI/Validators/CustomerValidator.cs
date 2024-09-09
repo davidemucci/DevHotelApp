@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace DevHotelAPI.Validators
 {
-    public class ClientValidator : AbstractValidator<Client>
+    public class CustomerValidator : AbstractValidator<Customer>
     {
-        public ClientValidator()
+        public CustomerValidator()
         {
             RuleFor(c => c.Name).MaximumLength(50);
             RuleFor(c => c.Surname).MaximumLength(50);

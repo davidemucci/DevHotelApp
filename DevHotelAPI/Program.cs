@@ -31,14 +31,14 @@ builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 
 builder.Services.AddAutoMapper(typeof(MainMapperProfile));
 builder.Services.AddScoped<IValidator<RoomType>, RoomTypeValidator>();
 builder.Services.AddScoped<IValidator<Room>, RoomValidator>();
-builder.Services.AddScoped<IValidator<Client>, ClientValidator>();
+builder.Services.AddScoped<IValidator<Customer>, CustomerValidator>();
 builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
 var app = builder.Build();
 

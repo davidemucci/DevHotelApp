@@ -2,7 +2,7 @@
 
 namespace DevHotelAPI.Dtos
 {
-    public class ClientDto
+    public class CustomerDto
     {
         public Guid? Id { get; set; }
         public string? Name { get; set; }

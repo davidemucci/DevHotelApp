@@ -15,7 +15,7 @@ namespace DevHotelAPI.Contexts
             _bogusRepo = bogusRepo;
         }
 
-        public DbSet<Client> Clients { get; set; }
+        public DbSet<Customer> Customers { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
@@ -24,12 +24,12 @@ namespace DevHotelAPI.Contexts
         {
             var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
             var roomsFaker = _bogusRepo.GenerateRooms(4, 10);
-            var clientsFaker = _bogusRepo.GenerateClients();
-            var reservationsFaker = _bogusRepo.GenerateReservations(clientsFaker);
+            var customersFaker = _bogusRepo.GenerateCustomers();
+            var reservationsFaker = _bogusRepo.GenerateReservations(customersFaker);
 
             modelBuilder.Entity<RoomType>().HasData(roomTypesFaker);
             modelBuilder.Entity<Room>().HasData(roomsFaker);
-            modelBuilder.Entity<Client>().HasData(clientsFaker);
+            modelBuilder.Entity<Customer>().HasData(customersFaker);
             modelBuilder.Entity<Reservation>().HasData(reservationsFaker);
 
         }
@@ -42,7 +42,7 @@ namespace DevHotelAPI.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<Client>(entity =>
+            modelBuilder.Entity<Customer>(entity =>
             {
                 entity.Property(p => p.Email).IsRequired();
                 entity.HasIndex(p => p.Email).IsUnique();
@@ -51,7 +51,7 @@ namespace DevHotelAPI.Contexts
 
             modelBuilder.Entity<Reservation>(entity =>
             {
-                entity.HasOne(e => e.Client).WithMany(e => e.Reservations)
+                entity.HasOne(e => e.Customer).WithMany(e => e.Reservations)
                 .IsRequired();
                 entity.Property(e => e.From).IsRequired();
                 entity.Property(e => e.To).IsRequired();

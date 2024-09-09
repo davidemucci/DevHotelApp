@@ -1,6 +1,6 @@
 ﻿namespace DevHotelAPI.Entities
 {
-    public class Client
+    public class Customer
     {
         public Guid Id { get; set; }
         public string? Address { get; set; }

@@ -93,13 +93,13 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task GetReservationByClientId_ReturnsOkResult_WithListOfReservationDtos()
+        public async Task GetReservationByCustomerId_ReturnsOkResult_WithListOfReservationDtos()
         {
             // Arrange
-            var clientId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
 
             // Act
-            var result = await _controller.GetReservationByClientId(clientId);
+            var result = await _controller.GetReservationByCustomerId(customerId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -124,7 +124,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now,
                 RoomNumber = 102
@@ -144,7 +144,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222225"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222225"),
                 From = new DateTime(2027, 1, 16, 15, 15, 0),
                 To = new DateTime(2027, 1, 18, 15, 15, 0),
                 RoomNumber = 100
@@ -164,7 +164,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -184,7 +184,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 RoomNumber = 102
             }; ;
@@ -202,7 +202,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
                 From = new DateTime(2027, 1, 16, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -222,7 +222,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 19, 15, 0, 0),
                 RoomNumber = 100
@@ -242,7 +242,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = new DateTime(2027, 1, 15, 15, 0, 0),
                 To = new DateTime(2027, 1, 17, 15, 0, 0),
                 RoomNumber = 100
@@ -262,7 +262,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 102
@@ -285,7 +285,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = Guid.NewGuid(),
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 101
@@ -306,7 +306,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
                 From = new DateTime(2027, 1, 16, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -328,7 +328,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 19, 15, 0, 0),
                 RoomNumber = 100
@@ -350,7 +350,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = new DateTime(2027, 1, 15, 15, 0, 0),
                 To = new DateTime(2027, 1, 17, 15, 0, 0),
                 RoomNumber = 100
@@ -372,7 +372,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                ClientId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 101

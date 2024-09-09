@@ -7,7 +7,7 @@ namespace DevHotelAPI.Validators
     {
         public ReservationValidator()
         {
-            RuleFor(r => r.ClientId).NotEmpty()
+            RuleFor(r => r.CustomerId).NotEmpty()
                 .WithMessage("Client ID must not be empty.");
 
             RuleFor(r => r.From).NotEmpty()

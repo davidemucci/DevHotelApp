@@ -74,7 +74,7 @@ namespace DevHotelAppTest
         {
             var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
             var roomsFaker = _bogusRepo.GenerateRooms(4, 10);
-            var clientsFaker = _bogusRepo.GenerateClients();
+            var clientsFaker = _bogusRepo.GenerateCustomers();
             var reservationsFaker = _bogusRepo.GenerateReservations(clientsFaker);
 
             await _context.AddRangeAsync(roomTypesFaker);

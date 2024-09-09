@@ -6,35 +6,35 @@ namespace DevHotelAPI.Services
 {
     public class BogusRepository : IBogusRepository
     {
-        public readonly Guid idClient = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        public readonly Guid idCustomer = Guid.Parse("11111111-1111-1111-1111-111111111111");
         public readonly Guid idReservation = Guid.Parse("22222222-2222-2222-2222-222222222222");
         private int totalRooms {  get; set; }
-        public List<Client> GenerateClients()
+        public List<Customer> GenerateCustomers()
         {
             var id = 1;
-            var client = new Faker<Client>()
+            var customer = new Faker<Customer>()
                 .RuleFor(r => r.Id, f => Guid.Parse("22222222-2222-2222-2222-22222222222" + id++.ToString()))
                 .RuleFor(r => r.Email, f => f.Internet.Email())
                 .RuleFor(r => r.Password, f => f.Internet.Password())
                 .RuleFor(r => r.Address, f => f.Address.StreetAddress()
                 );
 
-            var clientsFaker = Enumerable.Range(1, 2)
-                .Select(i => SeedRow(client, i))
+            var customersFaker = Enumerable.Range(1, 2)
+                .Select(i => SeedRow(customer, i))
                 .ToList();
 
-            return clientsFaker;
+            return customersFaker;
         }
 
-        public List<Reservation> GenerateReservations(List<Client> clientsFaker)
+        public List<Reservation> GenerateReservations(List<Customer> customersFaker)
         {
             var id = 1;
-            var total = clientsFaker.Count - 1;
+            var total = customersFaker.Count - 1;
             var roomNumberStart = 100;
             var reservations = new Faker<Reservation>()
                 .RuleFor(r => r.Id, f => Guid.Parse("11111111-1111-1111-1111-11111111111" + id++.ToString()))
                 .RuleFor(r => r.RoomNumber, f => roomNumberStart++)
-                .RuleFor(r => r.ClientId, i => clientsFaker[i.Random.Int(0, total)]?.Id)
+                .RuleFor(r => r.CustomerId, i => customersFaker[i.Random.Int(0, total)]?.Id)
                 .RuleFor(r => r.From, f => new DateTime(2027, 1, 16, 15, 15, 0))
                 .RuleFor(r => r.To, f => new DateTime(2027, 1, 18, 15, 15, 0))
                 ;

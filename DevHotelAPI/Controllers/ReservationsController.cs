@@ -46,9 +46,9 @@ namespace DevHotelAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByClientId(Guid clientId)
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByCustomerId(Guid customerId)
         {
-            var reservations = await _repository.GetReservationsByClientIdAsync(clientId);
+            var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId);
 
             return Ok(reservations != null ? _mapper.Map<List<ReservationDto>>(reservations) : null);
         }

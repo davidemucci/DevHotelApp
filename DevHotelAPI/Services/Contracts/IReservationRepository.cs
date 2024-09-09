@@ -9,7 +9,7 @@ namespace DevHotelAPI.Services.Contracts
         Task DeleteReservationAsync(Guid id);
         Task<IEnumerable<Reservation?>> GetAllReservationsAsync();
         Task<Reservation?> GetReservationByIdAsync(Guid id);
-        Task<IEnumerable<Reservation?>> GetReservationsByClientIdAsync(Guid clientId);
+        Task<IEnumerable<Reservation?>> GetReservationsByCustomerIdAsync(Guid customerId);
         Task<bool> ReservationExistsAsync(Guid id);
         Task UpdateReservationAsync(Reservation reservation);
     }
