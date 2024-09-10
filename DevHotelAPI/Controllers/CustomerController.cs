@@ -11,10 +11,12 @@ using AutoMapper;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/customers")]
+    [Authorize(Roles = "Consumer, Administrator")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
@@ -51,6 +53,7 @@ namespace DevHotelAPI.Controllers
             return Ok(customerDto);
         }
 
+        [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
         {
@@ -58,6 +61,7 @@ namespace DevHotelAPI.Controllers
             var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
             return Ok(customerDtos);
         }
+
         [HttpPost]
         public async Task<ActionResult<CustomerDto>> PostCustomer(CustomerDto customerDto)
         {

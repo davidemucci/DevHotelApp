@@ -6,6 +6,7 @@ using FluentValidation;
 using AutoMapper;
 using DevHotelAPI.Dtos;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DevHotelAPI.Controllers
 {
@@ -24,6 +25,7 @@ namespace DevHotelAPI.Controllers
 
         }
 
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(int id)
         {
@@ -65,6 +67,7 @@ namespace DevHotelAPI.Controllers
             return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
         }
 
+        [Authorize(Roles = "Administrator")]
         [HttpPost]
         public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
         {
@@ -79,6 +82,8 @@ namespace DevHotelAPI.Controllers
             await _repository.AddRoomAsync(room);
             return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
         }
+
+        [Authorize(Roles = "Administrator")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRoom(int id, RoomDto roomDto)
         {

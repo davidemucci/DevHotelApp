@@ -3,6 +3,7 @@ using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,7 @@ public class RoomTypesController : ControllerBase
         _validator = validator;
     }
 
+    [Authorize(Roles = "Administrator")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRoomType(int id)
     {
@@ -45,6 +47,8 @@ public class RoomTypesController : ControllerBase
         var roomTypes = await _roomTypeRepository.GetAllRoomTypesAsync();
         return Ok(roomTypes);
     }
+
+    [Authorize(Roles = "Administrator")]
     [HttpPost]
     public async Task<ActionResult<RoomType>> PostRoomType(RoomTypeDto roomTypeDto)
     {
@@ -61,6 +65,7 @@ public class RoomTypesController : ControllerBase
         return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
     }
 
+    [Authorize(Roles = "Administrator")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRoomType(int id, RoomTypeDto roomTypeDto)
     {

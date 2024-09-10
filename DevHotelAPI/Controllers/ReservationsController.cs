@@ -3,12 +3,14 @@ using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/reservations")]
+    [Authorize(Roles = "Consumer, Administrator")]
     [ApiController]
     public class ReservationsController : ControllerBase
     {
@@ -54,6 +56,7 @@ namespace DevHotelAPI.Controllers
             return Ok(reservations != null ? _mapper.Map<List<ReservationDto>>(reservations) : null);
         }
 
+        [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservations()
         {
@@ -61,6 +64,7 @@ namespace DevHotelAPI.Controllers
             var reservationDtos = _mapper.Map<IEnumerable<ReservationDto>>(reservations);
             return Ok(reservationDtos);
         }
+
         [HttpPost]
         public async Task<ActionResult<ReservationDto>> PostReservation(ReservationDto reservationDto)
         {
