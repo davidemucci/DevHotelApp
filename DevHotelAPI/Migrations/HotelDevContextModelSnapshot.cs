@@ -49,7 +49,7 @@ namespace DevHotelAPI.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
 
                     b.HasData(
                         new
@@ -90,7 +90,7 @@ namespace DevHotelAPI.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
 
                     b.HasData(
                         new
@@ -153,7 +153,7 @@ namespace DevHotelAPI.Migrations
 
                     b.HasIndex("RoomTypeId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
 
                     b.HasData(
                         new
@@ -231,7 +231,7 @@ namespace DevHotelAPI.Migrations
                     b.HasIndex("Description")
                         .IsUnique();
 
-                    b.ToTable("RoomTypes");
+                    b.ToTable("RoomTypes", (string)null);
 
                     b.HasData(
                         new

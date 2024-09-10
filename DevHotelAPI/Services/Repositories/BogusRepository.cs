@@ -61,7 +61,6 @@ namespace DevHotelAPI.Services
                 .RuleFor(r => r.To, f => new DateTime(2027, 1, 18, 15, 15, 0))
                 ;
 
-            // var reservationsFaker = reservations.Generate(5);
             var reservationsFaker = Enumerable.Range(1, 5)
                 .Select(i => SeedRow(reservations, i))
                 .ToList();

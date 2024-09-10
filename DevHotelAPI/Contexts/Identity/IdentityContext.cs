@@ -29,7 +29,6 @@ namespace DevHotelAPI.Contexts.Identity
         {
             var usersFaker = _bogusRepo.GenerateUsers();
             modelBuilder.Entity<IdentityUser<Guid>>().HasData(usersFaker);
-
         }
 
 
