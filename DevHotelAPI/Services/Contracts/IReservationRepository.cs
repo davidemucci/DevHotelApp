@@ -1,4 +1,5 @@
 ﻿using DevHotelAPI.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace DevHotelAPI.Services.Contracts
 {
@@ -6,9 +7,9 @@ namespace DevHotelAPI.Services.Contracts
     {
         Task AddReservationAsync(Reservation reservation);
         Task<bool> CheckIfRoomIsAvailableAsync(Reservation reservation);
-        Task DeleteReservationAsync(Guid id);
+        Task DeleteReservationAsync(Guid id, Guid identityUserId);
         Task<IEnumerable<Reservation?>> GetAllReservationsAsync();
-        Task<Reservation?> GetReservationByIdAsync(Guid id);
+        Task<Reservation?> GetReservationByIdAsync(Guid id, IdentityUser<Guid> user);
         Task<IEnumerable<Reservation?>> GetReservationsByCustomerIdAsync(Guid customerId);
         Task<bool> ReservationExistsAsync(Guid id);
         Task UpdateReservationAsync(Reservation reservation);

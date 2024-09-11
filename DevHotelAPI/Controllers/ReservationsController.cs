@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Azure;
+using Azure.Core;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,28 +20,51 @@ namespace DevHotelAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IReservationRepository _repository;
         private readonly IValidator<Reservation> _validator;
-        public ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator)
+        private readonly UserManager<IdentityUser<Guid>> _userManager;
+        public ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, UserManager<IdentityUser<Guid>> userManager)
         {
             _mapper = mapper;
             _repository = repository;
             _validator = validator;
+            _userManager = userManager;
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
         {
-            var reservation = await _repository.GetReservationByIdAsync(id);
-            if (reservation == null)
-                return NotFound();
+            var userName = HttpContext?.User?.Identity?.Name;
 
-            await _repository.DeleteReservationAsync(id);
-            return NoContent();
+            if (userName == null)
+                return BadRequest("User not found");
+
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user is null)
+                BadRequest("User info doesn't found");
+
+            try
+            {
+                await _repository.DeleteReservationAsync(id, user.Id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservationDto>> GetReservation(Guid id)
         {
-            var reservation = await _repository.GetReservationByIdAsync(id);
+            var userName = HttpContext?.User?.Identity?.Name;
+
+            if (userName == null)
+                return BadRequest("User not found");
+
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user is null)
+                BadRequest("User info doesn't found");
+
+            var reservation = await _repository.GetReservationByIdAsync(id, user);
 
             if (reservation == null)
                 return NotFound();
