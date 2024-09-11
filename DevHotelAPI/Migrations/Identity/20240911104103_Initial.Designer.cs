@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHotelAPI.Migrations.Identity
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20240909143351_addIdentity")]
-    partial class addIdentity
+    [Migration("20240911104103_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,20 @@ namespace DevHotelAPI.Migrations.Identity
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("19999999-9999-9999-9999-999999999991"),
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            Id = new Guid("19999999-9999-9999-9999-999999999992"),
+                            Name = "Consumer",
+                            NormalizedName = "CONSUMER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -147,27 +161,33 @@ namespace DevHotelAPI.Migrations.Identity
                         {
                             Id = new Guid("99999999-9999-9999-9999-999999999991"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "c2cfa978-d5a4-4b37-9079-af8cf21ecedc",
-                            Email = "Holly.Hermann64@yahoo.com",
+                            ConcurrencyStamp = "d2e639d5-514a-4944-bed4-29a124f35dba",
+                            Email = "admin@email.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
-                            PhoneNumber = "396-462-6779",
+                            NormalizedEmail = "ADMIN@EMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKkKBqySb16D295abICCOmk+M/GcOle+TZwpOQtlMSrn0GCRm/rmZniUSbgEUkBHjg==",
+                            PhoneNumber = "276-543-9160",
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
-                            UserName = "Delores_Brown"
+                            UserName = "admin"
                         },
                         new
                         {
                             Id = new Guid("99999999-9999-9999-9999-999999999992"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "49b591e0-c51f-41d1-8089-4f3e0ee37c95",
-                            Email = "Elnora.Schmitt@gmail.com",
+                            ConcurrencyStamp = "c56a9c09-9556-44ee-9723-df9a8c6ec3df",
+                            Email = "consumer@email.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
-                            PhoneNumber = "805-232-7270",
+                            NormalizedEmail = "CONSUMER@EMAIL.COM",
+                            NormalizedUserName = "CONSUMER",
+                            PasswordHash = "AQAAAAIAAYagAAAAECbqQedmc2VmQlq751RD/6vOWwGqd1elQpBA42tzkis8wSKQ8Q174EeXKTc3n0VDKg==",
+                            PhoneNumber = "591.338.4207 x0053",
                             PhoneNumberConfirmed = false,
                             TwoFactorEnabled = false,
-                            UserName = "Ole98"
+                            UserName = "consumer"
                         });
                 });
 
@@ -229,6 +249,18 @@ namespace DevHotelAPI.Migrations.Identity
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("99999999-9999-9999-9999-999999999991"),
+                            RoleId = new Guid("19999999-9999-9999-9999-999999999991")
+                        },
+                        new
+                        {
+                            UserId = new Guid("99999999-9999-9999-9999-999999999992"),
+                            RoleId = new Guid("19999999-9999-9999-9999-999999999992")
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>

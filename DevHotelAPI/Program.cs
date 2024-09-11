@@ -58,7 +58,7 @@ builder.Services.AddDbContext<HotelDevContext>(opt => opt.UseSqlServer(
 );
 
 builder.Services.AddDbContext<IdentityContext>(opt => opt.UseSqlServer(
-    builder.Configuration.GetConnectionString("IdentityHotelDevConnectionString"))
+    builder.Configuration.GetConnectionString("IdentityHotelDevConnectionString")).LogTo(Console.WriteLine, LogLevel.Information)
 );
 
 
@@ -110,8 +110,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    /*    var context = app.Services.GetRequiredService<HotelDevContext>();
-        context.Database.EnsureCreated();*/
     app.UseSwagger();
     app.UseSwaggerUI();
 }

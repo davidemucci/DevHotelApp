@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DevHotelAPI.Controllers
 {
     [Route("api/customers")]
-    [Authorize(Roles = "Consumer, Administrator")]
+    [Authorize(Roles = "Consumer,Administrator")]
     [ApiController]
     public class CustomerController : ControllerBase
     {

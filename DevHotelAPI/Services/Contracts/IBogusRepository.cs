@@ -11,7 +11,9 @@ namespace DevHotelAPI.Services.Contracts
         List<Customer> GenerateCustomers();
         List<Reservation> GenerateReservations(List<Customer> customersFaker);
         List<Room> GenerateRooms(int roomTypesTotalNumber = 4, int totalRoomsBumber = 10);
-        public List<RoomType> GenerateRoomTypes();
-        public List<IdentityUser<Guid>> GenerateUsers();
+        List<RoomType> GenerateRoomTypes();
+        List<IdentityUser<Guid>> GenerateUsers();
+        List<IdentityRole<Guid>> GenerateRoles();
+        List<IdentityUserRole<Guid>> AssignRolesToFakeUsers(List<IdentityRole<Guid>> roles, List<IdentityUser<Guid>> users);
     }
 }

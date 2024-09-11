@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DevHotelAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class addIdentity : Migration
+    public partial class addIdentityGuid : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

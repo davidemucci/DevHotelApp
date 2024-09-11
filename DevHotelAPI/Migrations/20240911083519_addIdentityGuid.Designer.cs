@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHotelAPI.Migrations
 {
     [DbContext(typeof(HotelDevContext))]
-    [Migration("20240909153222_addIdentity")]
-    partial class addIdentity
+    [Migration("20240911083519_addIdentityGuid")]
+    partial class addIdentityGuid
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

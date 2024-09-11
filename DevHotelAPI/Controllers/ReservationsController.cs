@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DevHotelAPI.Controllers
 {
     [Route("api/reservations")]
-    [Authorize(Roles = "Consumer, Administrator")]
+    [Authorize(Roles = "Administrator,Consumer")]
     [ApiController]
     public class ReservationsController : ControllerBase
     {

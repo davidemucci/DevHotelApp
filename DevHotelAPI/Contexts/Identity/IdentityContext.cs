@@ -1,6 +1,4 @@
-﻿using DevHotelAPI.Entities;
-using DevHotelAPI.Entities.Identity;
-using DevHotelAPI.Services.Contracts;
+﻿using DevHotelAPI.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +16,6 @@ namespace DevHotelAPI.Contexts.Identity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            _bogusRepo.GenerateUsers();
-
             DbInitialize(modelBuilder);
             base.OnModelCreating(modelBuilder);
 
@@ -28,9 +24,13 @@ namespace DevHotelAPI.Contexts.Identity
         public void DbInitialize(ModelBuilder modelBuilder)
         {
             var usersFaker = _bogusRepo.GenerateUsers();
+            var rolesFaker = _bogusRepo.GenerateRoles();
+            var usersRolesFaker = _bogusRepo.AssignRolesToFakeUsers(rolesFaker, usersFaker);
+
             modelBuilder.Entity<IdentityUser<Guid>>().HasData(usersFaker);
+            modelBuilder.Entity<IdentityRole<Guid>>().HasData(rolesFaker);
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(usersRolesFaker);
         }
-
-
     }
 }
+

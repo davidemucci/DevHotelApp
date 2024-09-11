@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DevHotelAPI.Migrations.Identity
 {
     /// <inheritdoc />
-    public partial class addIdentity : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -159,12 +159,30 @@ namespace DevHotelAPI.Migrations.Identity
                 });
 
             migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { new Guid("19999999-9999-9999-9999-999999999991"), null, "Administrator", "ADMINISTRATOR" },
+                    { new Guid("19999999-9999-9999-9999-999999999992"), null, "Consumer", "CONSUMER" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("99999999-9999-9999-9999-999999999991"), 0, "c2cfa978-d5a4-4b37-9079-af8cf21ecedc", "Holly.Hermann64@yahoo.com", false, false, null, null, null, null, "396-462-6779", false, null, false, "Delores_Brown" },
-                    { new Guid("99999999-9999-9999-9999-999999999992"), 0, "49b591e0-c51f-41d1-8089-4f3e0ee37c95", "Elnora.Schmitt@gmail.com", false, false, null, null, null, null, "805-232-7270", false, null, false, "Ole98" }
+                    { new Guid("99999999-9999-9999-9999-999999999991"), 0, "d2e639d5-514a-4944-bed4-29a124f35dba", "admin@email.com", false, false, null, "ADMIN@EMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEKkKBqySb16D295abICCOmk+M/GcOle+TZwpOQtlMSrn0GCRm/rmZniUSbgEUkBHjg==", "276-543-9160", false, null, false, "admin" },
+                    { new Guid("99999999-9999-9999-9999-999999999992"), 0, "c56a9c09-9556-44ee-9723-df9a8c6ec3df", "consumer@email.com", false, false, null, "CONSUMER@EMAIL.COM", "CONSUMER", "AQAAAAIAAYagAAAAECbqQedmc2VmQlq751RD/6vOWwGqd1elQpBA42tzkis8wSKQ8Q174EeXKTc3n0VDKg==", "591.338.4207 x0053", false, null, false, "consumer" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[,]
+                {
+                    { new Guid("19999999-9999-9999-9999-999999999991"), new Guid("99999999-9999-9999-9999-999999999991") },
+                    { new Guid("19999999-9999-9999-9999-999999999992"), new Guid("99999999-9999-9999-9999-999999999992") }
                 });
 
             migrationBuilder.CreateIndex(

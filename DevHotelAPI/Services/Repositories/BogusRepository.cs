@@ -3,32 +3,30 @@ using DevHotelAPI.Entities;
 using DevHotelAPI.Entities.Identity;
 using DevHotelAPI.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
+using System.Reflection;
 
 namespace DevHotelAPI.Services
 {
     public class BogusRepository : IBogusRepository
     {
-        public readonly Guid idCustomer = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        public readonly Guid idReservation = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        private int totalRooms {  get; set; }
+        private int totalRooms { get; set; }
 
-        public List<IdentityUser<Guid>> GenerateUsers()
+        public List<IdentityUserRole<Guid>> AssignRolesToFakeUsers(List<IdentityRole<Guid>> roles, List<IdentityUser<Guid>> users)
         {
-            var id = 1;
-            var userFaker = new Faker<IdentityUser<Guid>>()
-            .RuleFor(u => u.Id, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + id++.ToString()))
-            .RuleFor(u => u.UserName, f => f.Internet.UserName())
-            .RuleFor(u => u.Email, f => f.Internet.Email())
-            .RuleFor(u => u.PhoneNumber, f => f.Phone.PhoneNumber());
 
-            var usersFaker = Enumerable.Range(1, 2)
-                .Select(i => SeedRow(userFaker, i))
+            var countRoles = 0;
+            var countUsers = 0;
+            var userRoleFaker = new Faker<IdentityUserRole<Guid>>()
+                .RuleFor(r => r.RoleId, f => roles[countRoles++].Id)
+                .RuleFor(r => r.UserId, f => users[countUsers++].Id);
+
+            var usersRolesFaker = Enumerable.Range(1, 2)
+                .Select(i => SeedRow(userRoleFaker, i))
                 .ToList();
 
-            return usersFaker;
-        }
+            return usersRolesFaker;
 
-        
+        }
 
         public List<Customer> GenerateCustomers()
         {
@@ -65,6 +63,24 @@ namespace DevHotelAPI.Services
                 .Select(i => SeedRow(reservations, i))
                 .ToList();
             return reservationsFaker;
+        }
+
+        public List<IdentityRole<Guid>> GenerateRoles()
+        {
+            var id = 1;
+            var count = 0;
+            var rolesNames = new List<string>() { "Administrator", "Consumer" };
+
+            var roleFaker = new Faker<IdentityRole<Guid>>()
+            .RuleFor(u => u.Id, f => Guid.Parse("19999999-9999-9999-9999-99999999999" + id++.ToString()))
+            .RuleFor(u => u.Name, f => rolesNames[count])
+            .RuleFor(u => u.NormalizedName, f => rolesNames[count++].ToUpper());
+
+            var rolesFaker = Enumerable.Range(1, 2)
+                .Select(i => SeedRow(roleFaker, i))
+                .ToList();
+
+            return rolesFaker;
         }
 
         public List<Room> GenerateRooms(int roomTypesTotalNumber = 4, int totalRoomsBumber = 10)
@@ -104,6 +120,30 @@ namespace DevHotelAPI.Services
                 .ToList();
         }
 
+        public List<IdentityUser<Guid>> GenerateUsers()
+        {
+            var id = 1;
+            var nameCounter = 0;
+            var emailCounter = 0;
+            var passHasher = new PasswordHasher<IdentityUser<Guid>>();
+            var names = new List<string>() { "admin", "consumer" };
+            var email = new List<string>() { "admin@email.com", "consumer@email.com" };
+            var userFaker = new Faker<IdentityUser<Guid>>()
+            .RuleFor(u => u.Id, f => Guid.Parse("99999999-9999-9999-9999-99999999999" + id++.ToString()))
+            .RuleFor(u => u.UserName, f => names[nameCounter])
+            .RuleFor(u => u.NormalizedUserName, f => names[nameCounter++].ToUpper())
+            .RuleFor(u => u.PasswordHash, (f, u) => passHasher.HashPassword(u, "Passw0rd!"))
+            .RuleFor(u => u.Email, f => email[emailCounter])
+            .RuleFor(u => u.NormalizedEmail, f => email[emailCounter++].ToUpper())
+            .RuleFor(u => u.PhoneNumber, f => f.Phone.PhoneNumber());
+
+            var usersFaker = Enumerable.Range(1, 2)
+                .Select(i => SeedRow(userFaker, i))
+                .ToList();
+
+
+            return usersFaker;
+        }
         private static T SeedRow<T>(Faker<T> faker, int rowId) where T : class
         {
             var record = faker.UseSeed(rowId).Generate();
