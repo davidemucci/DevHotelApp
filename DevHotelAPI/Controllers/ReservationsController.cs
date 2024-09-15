@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DevHotelAPI.Controllers
 {
@@ -20,30 +21,28 @@ namespace DevHotelAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IReservationRepository _repository;
         private readonly IValidator<Reservation> _validator;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
-        public ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, UserManager<IdentityUser<Guid>> userManager)
+        public ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator)
         {
             _mapper = mapper;
             _repository = repository;
             _validator = validator;
-            _userManager = userManager;
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
         {
             var userName = HttpContext?.User?.Identity?.Name;
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userName == null)
                 return BadRequest("User not found");
 
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user is null)
-                BadRequest("User info doesn't found");
+            if (!await _repository.ReservationExistsAsync(id))
+                return NotFound();
 
             try
             {
-                await _repository.DeleteReservationAsync(id, user.Id);
+                await _repository.DeleteReservationAsync(id, userName);
                 return NoContent();
             }
             catch (Exception ex)
@@ -60,11 +59,7 @@ namespace DevHotelAPI.Controllers
             if (userName == null)
                 return BadRequest("User not found");
 
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user is null)
-                BadRequest("User info doesn't found");
-
-            var reservation = await _repository.GetReservationByIdAsync(id, user);
+            var reservation = await _repository.GetReservationByIdAsync(id, userName);
 
             if (reservation == null)
                 return NotFound();
@@ -77,7 +72,10 @@ namespace DevHotelAPI.Controllers
         [Route("get-reservation-by-customer-id")]
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByCustomerId(Guid customerId)
         {
-            var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId);
+            var userName = HttpContext?.User?.Identity?.Name;
+            if (userName == null)
+                return BadRequest("User not found");
+            var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId, userName);
 
             return Ok(reservations != null ? _mapper.Map<List<ReservationDto>>(reservations) : null);
         }
@@ -94,6 +92,11 @@ namespace DevHotelAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservationDto>> PostReservation(ReservationDto reservationDto)
         {
+            var userName = HttpContext?.User?.Identity?.Name;
+
+            if (userName == null)
+                return BadRequest("User not found");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -106,13 +109,18 @@ namespace DevHotelAPI.Controllers
                 return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
 
 
-            await _repository.AddReservationAsync(reservation);
+            await _repository.AddReservationAsync(reservation, userName);
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(Guid id, ReservationDto reservationDto)
         {
+            var userName = HttpContext?.User?.Identity?.Name;
+
+            if (userName == null)
+                return BadRequest("User not found");
+
             if (id != reservationDto.Id)
                 return BadRequest();
 
@@ -129,7 +137,7 @@ namespace DevHotelAPI.Controllers
 
             try
             {
-                await _repository.UpdateReservationAsync(reservation);
+                await _repository.UpdateReservationAsync(reservation, userName);
             }
             catch (DbUpdateConcurrencyException)
             {
