@@ -1,26 +1,25 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Contexts;
+using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevHotelAppTest
 {
     public class DatabaseFixture : IAsyncLifetime
     {
         private IBogusRepository _bogusRepo;
+        private UserManager<IdentityUser<Guid>> _userManger;
+        public HotelDevContext _context { get; private set; }
+        public IdentityContext _identityContext { get; private set; }
         public DatabaseFixture()
         {
 
         }
 
-        public HotelDevContext _context { get; private set; }
         public void DetachAllEntities()
         {
             var changedEntriesCopy = _context.ChangeTracker.Entries()
@@ -53,20 +52,25 @@ namespace DevHotelAppTest
 
         public async Task InitializeAsync()
         {
-            await ResetContext();
+            ResetContext();
         }
 
-        public async Task ResetContext()
+        public void ResetContext()
         {
             var options = new DbContextOptionsBuilder<HotelDevContext>()
-                .UseInMemoryDatabase(databaseName: "TestHotelDevDb" + Guid.NewGuid())
+                .UseInMemoryDatabase(databaseName: "TestHotelDevDb-" + Guid.NewGuid())
+                .EnableSensitiveDataLogging()
+                .Options;
+
+            var optionsIdentity = new DbContextOptionsBuilder<IdentityContext>()
+                .UseInMemoryDatabase(databaseName: "TestIdentityHotelDevDb-" + Guid.NewGuid())
                 .EnableSensitiveDataLogging()
                 .Options;
 
             _bogusRepo = new BogusRepository();
             _context = new HotelDevContext(options, _bogusRepo);
-            DetachAllEntities();
-            _context.Database.EnsureDeleted();
+            _identityContext = new IdentityContext(optionsIdentity, _bogusRepo);
+            _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
         }
 

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Contexts;
+using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
@@ -8,41 +9,56 @@ using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace DevHotelAppTest
 {
     public class ReservationsControllerTests : IClassFixture<DatabaseFixture>
     {
         private readonly HotelDevContext _context;
+        private readonly IdentityContext _identityContext;
         private readonly ReservationsController _controller;
         private readonly DatabaseFixture _databaseFixture;
         private readonly IMapper _mapper;
         private readonly IReservationRepository _repository;
+        private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Reservation> _validator;
 
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
             _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            databaseFixture.SeedDatabase();
             _context = databaseFixture._context;
+            _identityContext = databaseFixture._identityContext;
             _mapper = databaseFixture.GetMapper();
-            _repository = new ReservationRepository(_context);
+            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(_identityContext);
+            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null, null, null, null, null, null, null, null);
+            _repository = new ReservationRepository(_context, _identityContext, _userManager);
             _validator = new ReservationValidator();
             _controller = new ReservationsController(_mapper, _repository, _validator);
+            databaseFixture.SeedDatabase();
+
+            var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "ADMIN")
+            }, "mock"));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userAdmin }
+            };
+
         }
 
         [Fact]
-        public async Task DeleteReservation_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task DeleteReservationOfOtherCustomerAsAdmin_ReturnsNoContent_WhenDeletionIsSuccessful()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
 
             // Act
             var result = await _controller.DeleteReservation(validId);
@@ -96,7 +112,16 @@ namespace DevHotelAppTest
         public async Task GetReservationByCustomerId_ReturnsOkResult_WithListOfReservationDtos()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, "CONSUMER")
+                }, "mock"));
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userConsumer }
+            };
 
             // Act
             var result = await _controller.GetReservationByCustomerId(customerId);
@@ -104,7 +129,7 @@ namespace DevHotelAppTest
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<ReservationDto>>(okResult.Value);
-            Assert.Equal(3, returnValue.Count);
+            Assert.Equal(2, returnValue.Count);
         }
 
         [Fact]

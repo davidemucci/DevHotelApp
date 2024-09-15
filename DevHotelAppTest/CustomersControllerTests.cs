@@ -22,14 +22,14 @@ namespace DevHotelAppTest
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {
-            _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            databaseFixture.SeedDatabase();
+            _databaseFixture = databaseFixture;
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
             _repository = new CustomerRepository(_context);
             _validator = new CustomerValidator();
             _controller = new CustomerController(_mapper, _repository, _validator);
+            databaseFixture.SeedDatabase();
         }
 
         [Fact]
