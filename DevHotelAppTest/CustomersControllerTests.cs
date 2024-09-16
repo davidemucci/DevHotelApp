@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Contexts;
+using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
@@ -7,6 +8,7 @@ using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DevHotelAppTest
@@ -16,26 +18,32 @@ namespace DevHotelAppTest
         private readonly HotelDevContext _context;
         private readonly CustomerController _controller;
         private readonly DatabaseFixture _databaseFixture;
+        private readonly IdentityContext _identityContext;
         private readonly IMapper _mapper;
         private readonly ICustomerRepository _repository;
+        private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Customer> _validator;
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {
             databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
+            _identityContext = databaseFixture._identityContext;
+            _userManager = databaseFixture._userManager;    
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
-            _repository = new CustomerRepository(_context);
+            _repository = new CustomerRepository(_context, _userManager);
             _validator = new CustomerValidator();
             _controller = new CustomerController(_mapper, _repository, _validator);
+
+            _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
 
         [Fact]
         public async Task DeleteCustomer_ReturnsNoContent_WhenCustomerIsDeleted()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
             // Act
             var result = await _controller.DeleteCustomer(customerId);
@@ -45,10 +53,25 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task GetCustomer_ReturnsCustomer_WhenCustomerExists()
+        public async Task DeleteCustomer_ReturnsNoContentAndNotDeleteCustomer_WhenCustomerToDeleteIsAnotherUserANDIsNotAdmin()
         {
             // Arrange
             var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+
+            // Act
+            var result = await _controller.DeleteCustomer(customerId);
+            var isNotDeleted = await _repository.CustomerExistsAsync(customerId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            Assert.True(isNotDeleted);
+        }
+
+        [Fact]
+        public async Task GetCustomer_ReturnsCustomer_WhenCustomerExists()
+        {
+            // Arrange
+            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
             // Act
             var result = await _controller.GetCustomer(customerId);
@@ -117,7 +140,6 @@ namespace DevHotelAppTest
                 Email = "newcustomeremail@email.com",
                 Password = "password1234!",
                 Address = "via cipressi 12, Milano, Italia"
-            
             };
 
             // Act

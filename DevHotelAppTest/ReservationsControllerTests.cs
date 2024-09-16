@@ -35,21 +35,11 @@ namespace DevHotelAppTest
             _context = databaseFixture._context;
             _identityContext = databaseFixture._identityContext;
             _mapper = databaseFixture.GetMapper();
-            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(_identityContext);
-            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null, null, null, null, null, null, null, null);
+            _userManager = databaseFixture._userManager;
             _repository = new ReservationRepository(_context, _identityContext, _userManager);
             _validator = new ReservationValidator();
             _controller = new ReservationsController(_mapper, _repository, _validator);
-
-            var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, "ADMIN")
-            }, "mock"));
-
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = userAdmin }
-            };
+            _databaseFixture.SetHttpContextAsConsumerUser(_controller);
 
         }
 
@@ -96,7 +86,7 @@ namespace DevHotelAppTest
         public async Task GetReservation_ReturnsReservation_WhenIdIsValid()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
 
             // Act
             var result = await _controller.GetReservation(validId);
@@ -286,7 +276,7 @@ namespace DevHotelAppTest
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 102

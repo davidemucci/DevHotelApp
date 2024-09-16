@@ -1,5 +1,6 @@
 using AutoMapper;
 using DevHotelAPI.Contexts;
+using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
@@ -10,6 +11,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Moq;
 
 namespace DevHotelAppTest
 {
@@ -171,6 +173,19 @@ namespace DevHotelAppTest
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task PutRoomType_ReturnsBadRequest_WhenRoomTypeIdIsZero()
+        {
+            // Arrange
+            var roomType = new RoomTypeDto { Id = 0, Description = "Descrizione", TotalNumber = 111 };
+
+            // Act
+            var result = await _controller.PutRoomType(0, _mapper.Map<RoomTypeDto>(roomType));
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
         }
     }
 }

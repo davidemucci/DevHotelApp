@@ -4,11 +4,15 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Client;
+using System.Security.Claims;
 
 namespace DevHotelAppTest
 {
@@ -18,6 +22,7 @@ namespace DevHotelAppTest
         private UserManager<IdentityUser<Guid>> _userManger;
         public HotelDevContext _context { get; private set; }
         public IdentityContext _identityContext { get; private set; }
+        public UserManager<IdentityUser<Guid>> _userManager;
         public DatabaseFixture()
         {
 
@@ -69,17 +74,48 @@ namespace DevHotelAppTest
                 .UseInMemoryDatabase(databaseName: "TestIdentityHotelDevDb-" + Guid.NewGuid())
                 .EnableSensitiveDataLogging()
                 .Options;
+
             IHostEnvironment env = new HostEnvironment()
             {
                 EnvironmentName = "Staging",
                 ApplicationName = "App",
                 ContentRootPath = ""
             };
+
             _bogusRepo = new BogusRepository();
             _context = new HotelDevContext(options, _bogusRepo, env);
             _identityContext = new IdentityContext(optionsIdentity, _bogusRepo, env);
+            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(_identityContext);
+            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null, null, null, null, null, null, null, null);
             _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
+
+        }
+
+        public void SetHttpContextAsAdminUser(ControllerBase controller)
+        {
+            var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "ADMIN")
+            }, "mock"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userAdmin }
+            };
+        }
+
+        public void SetHttpContextAsConsumerUser(ControllerBase controller)
+        {
+            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "CONSUMER")
+            }, "mock"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userConsumer }
+            };
         }
 
         public class HostEnvironment : IHostEnvironment
