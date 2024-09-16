@@ -34,18 +34,34 @@ namespace DevHotelAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
-            var customer = await _repository.GetCustomerByIdAsync(id);
-            if (customer == null)
-                return NotFound();
+            var userName = User.Identity?.Name;
 
-            await _repository.DeleteCustomerAsync(id);
-            return NoContent();
+            if (string.IsNullOrEmpty(userName))
+                return BadRequest($"User not found");
+
+            if (!await _repository.CustomerExistsAsync(id))
+                return NotFound();
+            try
+            {
+                await _repository.DeleteCustomerAsync(id, userName);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CustomerDto>> GetCustomer(Guid id)
         {
-            var customer = await _repository.GetCustomerByIdAsync(id);
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+                return BadRequest($"User not found");
+
+            var customer = await _repository.GetCustomerByIdAsync(id, userName);
 
             if (customer == null)
                 return NotFound();
@@ -81,6 +97,11 @@ namespace DevHotelAPI.Controllers
             if (id != customerDto.Id)
                 return BadRequest();
 
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+                return BadRequest($"User not found");
+
             var customer = _mapper.Map<Customer>(customerDto);
 
             if (!_validator.Validate(customer).IsValid)
@@ -88,7 +109,7 @@ namespace DevHotelAPI.Controllers
 
             try
             {
-                await _repository.UpdateCustomerAsync(customer);
+                await _repository.UpdateCustomerAsync(customer, userName);
             }
             catch (DbUpdateConcurrencyException)
             {

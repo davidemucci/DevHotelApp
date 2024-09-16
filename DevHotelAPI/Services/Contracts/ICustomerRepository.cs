@@ -6,9 +6,9 @@ namespace DevHotelAPI.Services.Contracts
     {
         Task AddCustomerAsync(Customer customer);
         Task<bool> CustomerExistsAsync(Guid id);
-        Task DeleteCustomerAsync(Guid id);
+        Task DeleteCustomerAsync(Guid id, string userName);
         Task<IEnumerable<Customer?>> GetAllCustomersAsync();
-        Task<Customer?> GetCustomerByIdAsync(Guid id);
-        Task UpdateCustomerAsync(Customer customer);
+        Task<Customer?> GetCustomerByIdAsync(Guid id, string userName);
+        Task UpdateCustomerAsync(Customer customer, string userName);
     }
 }
