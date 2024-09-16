@@ -32,9 +32,8 @@ namespace DevHotelAPI.Controllers
         public async Task<IActionResult> DeleteReservation(Guid id)
         {
             var userName = HttpContext?.User?.Identity?.Name;
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (userName == null)
+            if (string.IsNullOrEmpty(userName))
                 return BadRequest("User not found");
 
             if (!await _repository.ReservationExistsAsync(id))
@@ -56,7 +55,7 @@ namespace DevHotelAPI.Controllers
         {
             var userName = HttpContext?.User?.Identity?.Name;
 
-            if (userName == null)
+            if (string.IsNullOrEmpty(userName))
                 return BadRequest("User not found");
 
             var reservation = await _repository.GetReservationByIdAsync(id, userName);
@@ -73,8 +72,9 @@ namespace DevHotelAPI.Controllers
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationByCustomerId(Guid customerId)
         {
             var userName = HttpContext?.User?.Identity?.Name;
-            if (userName == null)
+            if (string.IsNullOrEmpty(userName))
                 return BadRequest("User not found");
+
             var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId, userName);
 
             return Ok(reservations != null ? _mapper.Map<List<ReservationDto>>(reservations) : null);
@@ -94,7 +94,7 @@ namespace DevHotelAPI.Controllers
         {
             var userName = HttpContext?.User?.Identity?.Name;
 
-            if (userName == null)
+            if (string.IsNullOrEmpty(userName))
                 return BadRequest("User not found");
 
             var reservation = _mapper.Map<Reservation>(reservationDto);
@@ -115,7 +115,7 @@ namespace DevHotelAPI.Controllers
         {
             var userName = HttpContext?.User?.Identity?.Name;
 
-            if (userName == null)
+            if (string.IsNullOrEmpty(userName))
                 return BadRequest("User not found");
 
             if (id != reservationDto.Id)
