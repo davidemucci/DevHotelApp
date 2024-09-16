@@ -105,9 +105,15 @@ namespace DevHotelAPI.Controllers
             if (!await _repository.CheckIfRoomIsAvailableAsync(reservation))
                 return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
 
-
-            await _repository.AddReservationAsync(reservation, userName);
-            return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
+            try
+            {
+                await _repository.AddReservationAsync(reservation, userName);
+                return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Can't add reservation.");
+            }
         }
 
         [HttpPut("{id}")]
@@ -140,6 +146,11 @@ namespace DevHotelAPI.Controllers
                 else
                     throw;
             }
+            catch (Exception ex)
+            {
+                return BadRequest($"Can't modify the reservation with id {id}");
+            }
+
 
             return NoContent();
         }

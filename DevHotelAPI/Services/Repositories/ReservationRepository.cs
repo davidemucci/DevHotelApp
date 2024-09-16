@@ -25,7 +25,7 @@ namespace DevHotelAPI.Services.Repositories
         {   
             var user = await _userManager.FindByNameAsync(userName);
             if(user == null)
-                throw new NullReferenceException($"User with username '{userName}' not found."); 
+                return; 
 
             if(
                 await _context.Customers.Where(c => c.IdentityUserId.Equals(user.Id) && c.Id.Equals(reservation.CustomerId)).AnyAsync() || 
@@ -53,7 +53,7 @@ namespace DevHotelAPI.Services.Repositories
         {
             var identityUser = await _userManager.FindByNameAsync(userName);
             if (identityUser == null)
-                throw new NullReferenceException("User not found");
+                return;
 
             var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
@@ -80,7 +80,7 @@ namespace DevHotelAPI.Services.Repositories
         {
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
-                throw new Exception("Not user found");
+                return null;
 
             var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
             IQueryable<Reservation> reseservationQuery;
@@ -101,7 +101,7 @@ namespace DevHotelAPI.Services.Repositories
         {
             var identityUser = await _userManager.FindByNameAsync(userName);
             if (identityUser == null)
-                throw new Exception("User not found");
+                return null;
 
             var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
@@ -125,7 +125,7 @@ namespace DevHotelAPI.Services.Repositories
             var identityUser = await _userManager.FindByNameAsync(userName);
           
             if (identityUser == null)
-                throw new Exception("User not found");
+                return;
 
             var user = _context.Customers.Where(c => c.IdentityUserId.Equals(identityUser.Id)).FirstOrDefault();
             var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
