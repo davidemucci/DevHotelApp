@@ -14,7 +14,7 @@ namespace DevHotelAPI.Services.Repositories
             _context = context;
         }
 
-        public async Task AddCuatomerAsync(Customer client)
+        public async Task AddCustomerAsync(Customer client)
         {
             await _context.Customers.AddAsync(client);
             await _context.SaveChangesAsync();

@@ -4,7 +4,7 @@ namespace DevHotelAPI.Services.Contracts
 {
     public interface ICustomerRepository
     {
-        Task AddCuatomerAsync(Customer customer);
+        Task AddCustomerAsync(Customer customer);
         Task<bool> CustomerExistsAsync(Guid id);
         Task DeleteCustomerAsync(Guid id);
         Task<IEnumerable<Customer?>> GetAllCustomersAsync();

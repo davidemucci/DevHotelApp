@@ -22,6 +22,7 @@ namespace DevHotelAPI.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ICustomerRepository _repository;
+        private readonly IHostEnvironment _env;
         private readonly IValidator<Customer> _validator;
         public CustomerController(IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator)
         {
@@ -70,7 +71,7 @@ namespace DevHotelAPI.Controllers
             if (!_validator.Validate(customer).IsValid)
                 return BadRequest(_validator.Validate(customer).Errors);
 
-            await _repository.AddCuatomerAsync(customer);
+            await _repository.AddCustomerAsync(customer);
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customerDto);
         }
 

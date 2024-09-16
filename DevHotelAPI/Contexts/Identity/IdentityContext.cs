@@ -8,15 +8,19 @@ namespace DevHotelAPI.Contexts.Identity
     public class IdentityContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>
     {
         private IBogusRepository _bogusRepo { get; set; }
+        private readonly IHostEnvironment _env;
 
-        public IdentityContext(DbContextOptions<IdentityContext> options, IBogusRepository bogusRepo) : base(options)
+        public IdentityContext(DbContextOptions<IdentityContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : base(options)
         {
             _bogusRepo = bogusRepo;
+            _env = env;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            DbInitialize(modelBuilder);
+            if (_env.IsDevelopment() || _env.IsStaging())
+                DbInitialize(modelBuilder);
+            
             base.OnModelCreating(modelBuilder);
 
         }

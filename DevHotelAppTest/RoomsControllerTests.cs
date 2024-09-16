@@ -29,7 +29,6 @@ namespace DevHotelAppTest
         {
             _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            databaseFixture.SeedDatabase();
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
             _repository = new RoomRepository(_context);

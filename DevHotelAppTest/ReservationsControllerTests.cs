@@ -40,7 +40,6 @@ namespace DevHotelAppTest
             _repository = new ReservationRepository(_context, _identityContext, _userManager);
             _validator = new ReservationValidator();
             _controller = new ReservationsController(_mapper, _repository, _validator);
-            databaseFixture.SeedDatabase();
 
             var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {

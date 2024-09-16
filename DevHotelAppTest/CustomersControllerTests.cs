@@ -29,7 +29,6 @@ namespace DevHotelAppTest
             _repository = new CustomerRepository(_context);
             _validator = new CustomerValidator();
             _controller = new CustomerController(_mapper, _repository, _validator);
-            databaseFixture.SeedDatabase();
         }
 
         [Fact]

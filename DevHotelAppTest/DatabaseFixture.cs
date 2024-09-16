@@ -6,6 +6,9 @@ using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Identity.Client;
 
 namespace DevHotelAppTest
 {
@@ -66,27 +69,25 @@ namespace DevHotelAppTest
                 .UseInMemoryDatabase(databaseName: "TestIdentityHotelDevDb-" + Guid.NewGuid())
                 .EnableSensitiveDataLogging()
                 .Options;
-
+            IHostEnvironment env = new HostEnvironment()
+            {
+                EnvironmentName = "Staging",
+                ApplicationName = "App",
+                ContentRootPath = ""
+            };
             _bogusRepo = new BogusRepository();
-            _context = new HotelDevContext(options, _bogusRepo);
-            _identityContext = new IdentityContext(optionsIdentity, _bogusRepo);
+            _context = new HotelDevContext(options, _bogusRepo, env);
+            _identityContext = new IdentityContext(optionsIdentity, _bogusRepo, env);
             _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
         }
 
-        public async Task SeedDatabase()
+        public class HostEnvironment : IHostEnvironment
         {
-            var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
-            var roomsFaker = _bogusRepo.GenerateRooms(4, 10);
-            var clientsFaker = _bogusRepo.GenerateCustomers();
-            var reservationsFaker = _bogusRepo.GenerateReservations(clientsFaker);
-
-            await _context.AddRangeAsync(roomTypesFaker);
-            await _context.AddRangeAsync(roomsFaker);
-            await _context.AddRangeAsync(clientsFaker);
-            await _context.AddRangeAsync(reservationsFaker);
-            await _context.SaveChangesAsync();
-            DetachAllEntities();
+            public string EnvironmentName { get; set; }
+            public string ApplicationName { get; set; }
+            public string ContentRootPath { get; set; }
+            IFileProvider IHostEnvironment.ContentRootFileProvider { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
     }
 }

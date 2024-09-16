@@ -11,9 +11,11 @@ namespace DevHotelAPI.Contexts
 {
     public class HotelDevContext : DbContext
     {
-        public HotelDevContext(DbContextOptions<HotelDevContext> options, IBogusRepository bogusRepo) : base(options)
+        private readonly IHostEnvironment _env;
+        public HotelDevContext(DbContextOptions<HotelDevContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : base(options)
         {
             _bogusRepo = bogusRepo;
+            _env = env;
         }
 
         public DbSet<Customer> Customers { get; set; }
@@ -74,7 +76,7 @@ namespace DevHotelAPI.Contexts
                 entity.HasKey(e => e.Id);
             });
 
-            if (!IsInMemoryDatabase())
+            if (_env.IsDevelopment() || _env.IsStaging())
                 DbInitialize(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
