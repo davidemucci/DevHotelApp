@@ -52,9 +52,6 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task<Customer?> GetCustomerByIdAsync(Guid id, string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-                throw new ArgumentNullException(nameof(userName));
-
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
             var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
             var customer = await _context.Customers.FindAsync(id) ?? throw new ArgumentNullException($"Customer with id {id} not found");
@@ -70,9 +67,6 @@ namespace DevHotelAPI.Services.Repositories
         }
         public async Task UpdateCustomerAsync(Customer customer, string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-                throw new ArgumentNullException(nameof(userName));
-
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
             var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 

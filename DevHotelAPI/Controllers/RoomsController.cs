@@ -64,9 +64,9 @@ namespace DevHotelAPI.Controllers
 
             return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
         }
-
-        [Authorize(Roles = "Administrator")]
+    
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
         {
             var room = _mapper.Map<Room>(roomDto);

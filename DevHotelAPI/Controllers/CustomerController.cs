@@ -50,7 +50,11 @@ namespace DevHotelAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+
         }
 
         [HttpGet("{id}")]
@@ -61,13 +65,24 @@ namespace DevHotelAPI.Controllers
             if (string.IsNullOrEmpty(userName))
                 return BadRequest($"User not found");
 
-            var customer = await _repository.GetCustomerByIdAsync(id, userName);
+            try
+            {
+                var customer = await _repository.GetCustomerByIdAsync(id, userName);
+                if (customer == null)
+                    return NotFound();
 
-            if (customer == null)
-                return NotFound();
+                var customerDto = _mapper.Map<CustomerDto>(customer);
+                return Ok(customerDto);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
 
-            var customerDto = _mapper.Map<CustomerDto>(customer);
-            return Ok(customerDto);
         }
 
         [Authorize(Roles = "Administrator")]
@@ -79,15 +94,24 @@ namespace DevHotelAPI.Controllers
             return Ok(customerDtos);
         }
 
+
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<CustomerDto>> PostCustomer(CustomerDto customerDto)
         {
             var customer = _mapper.Map<Customer>(customerDto);
 
             if (!_validator.Validate(customer).IsValid)
                 return BadRequest(_validator.Validate(customer).Errors);
+            try
+            {
+                await _repository.AddCustomerAsync(customer);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
 
-            await _repository.AddCustomerAsync(customer);
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customerDto);
         }
 
@@ -117,6 +141,10 @@ namespace DevHotelAPI.Controllers
                     return NotFound();
                 else
                     throw;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
             }
 
             return NoContent();
