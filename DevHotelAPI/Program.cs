@@ -14,11 +14,26 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DevHotelAPI.Contexts.Identity;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSerilog((services, lc) => lc
+    .ReadFrom.Configuration(builder.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
+
 builder.Services.AddControllers(opt => opt.RespectBrowserAcceptHeader = true)
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -91,7 +106,7 @@ builder.Services.AddAuthentication(opt =>
         ValidIssuer = issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
     };
-} );
+});
 
 builder.Services.AddScoped<IBogusRepository, BogusRepository>();
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();
@@ -109,6 +124,7 @@ builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -118,7 +134,27 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/error");
+    var logger = app.Services.GetRequiredService<Logger>();
+
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/html";
+
+            var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+            if (exceptionHandlerPathFeature?.Error != null)
+            {
+                logger.Error(exceptionHandlerPathFeature.Error, "Unhandled exception");
+            }
+
+            await context.Response.WriteAsync("<html><body>\n");
+            await context.Response.WriteAsync("An error occurred. Please try again later.<br>\n");
+            await context.Response.WriteAsync("</body></html>\n");
+        });
+    });
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
