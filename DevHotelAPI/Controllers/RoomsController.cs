@@ -31,9 +31,7 @@ namespace DevHotelAPI.Controllers
         {
             var room = await _repository.GetByIdRoomAsync(id);
             if (room == null)
-            {
                 return NotFound();
-            }
 
             await _repository.DeleteRoomAsync(id);
             return NoContent();
@@ -71,9 +69,6 @@ namespace DevHotelAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var room = _mapper.Map<Room>(roomDto);
 
             if (!_validator.Validate(room).IsValid)
@@ -89,9 +84,6 @@ namespace DevHotelAPI.Controllers
         {
             if (id != roomDto.Number)
                 return BadRequest();
-
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             var room = _mapper.Map<Room>(roomDto);
 
@@ -112,6 +104,7 @@ namespace DevHotelAPI.Controllers
 
             return NoContent();
         }
+
         private async Task<bool> RoomExists(int id)
         {
             var room = await _repository.GetByIdRoomAsync(id);

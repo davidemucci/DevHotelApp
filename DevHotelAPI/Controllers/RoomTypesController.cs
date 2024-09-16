@@ -52,10 +52,6 @@ public class RoomTypesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RoomType>> PostRoomType(RoomTypeDto roomTypeDto)
     {
-
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         var roomType = _mapper.Map<RoomType>(roomTypeDto);
 
         if (!_validator.Validate(roomType).IsValid)

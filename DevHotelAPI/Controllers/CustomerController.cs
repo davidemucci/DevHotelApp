@@ -80,9 +80,6 @@ namespace DevHotelAPI.Controllers
             if (id != customerDto.Id)
                 return BadRequest();
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var customer = _mapper.Map<Customer>(customerDto);
 
             if (!_validator.Validate(customer).IsValid)
