@@ -97,9 +97,6 @@ namespace DevHotelAPI.Controllers
             if (userName == null)
                 return BadRequest("User not found");
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var reservation = _mapper.Map<Reservation>(reservationDto);
 
             if (!_validator.Validate(reservation).IsValid)
@@ -123,9 +120,6 @@ namespace DevHotelAPI.Controllers
 
             if (id != reservationDto.Id)
                 return BadRequest();
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             var reservation = _mapper.Map<Reservation>(reservationDto);
 

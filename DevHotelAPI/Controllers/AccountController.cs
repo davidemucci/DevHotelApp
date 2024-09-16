@@ -46,9 +46,6 @@ namespace DevHotelAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] AddOrUpdateCustomerModel model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var existedUser = await _userManager.FindByNameAsync(model.UserName);
             if (existedUser != null)
             {
@@ -83,7 +80,7 @@ namespace DevHotelAPI.Controllers
         {
             var user = await _userManager.FindByNameAsync(username);
             if (user is null)
-                return BadRequest(ModelState); 
+                return BadRequest($"User with {username} not found."); 
 
             try
             {
