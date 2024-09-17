@@ -12,24 +12,19 @@ using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Serilog.Core;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/customers")]
     [Authorize(Roles = "Consumer,Administrator")]
     [ApiController]
-    public class CustomerController : ControllerBase
+    public class CustomerController(Logger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly ICustomerRepository _repository;
-        private readonly IHostEnvironment _env;
-        private readonly IValidator<Customer> _validator;
-        public CustomerController(IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator)
-        {
-            _mapper = mapper;
-            _repository = repository;
-            _validator = validator;
-        }
+        private readonly IMapper _mapper = mapper;
+        private readonly ICustomerRepository _repository = repository;
+        private readonly IValidator<Customer> _validator = validator;
+        private readonly Logger _logger = logger;
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)
@@ -49,8 +44,15 @@ namespace DevHotelAPI.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return BadRequest(ex.Message);
+            }catch(ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
             }
-            
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message, ex);
+                return BadRequest($"Error deleting customer with id {id}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -61,13 +63,28 @@ namespace DevHotelAPI.Controllers
             if (string.IsNullOrEmpty(userName))
                 return BadRequest($"User not found");
 
-            var customer = await _repository.GetCustomerByIdAsync(id, userName);
+            try
+            {
+                var customer = await _repository.GetCustomerByIdAsync(id, userName);
+                if (customer == null)
+                    return NotFound();
 
-            if (customer == null)
-                return NotFound();
-
-            var customerDto = _mapper.Map<CustomerDto>(customer);
-            return Ok(customerDto);
+                var customerDto = _mapper.Map<CustomerDto>(customer);
+                return Ok(customerDto);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"Error getting customer with id {id}");
+            }
         }
 
         [Authorize(Roles = "Administrator")]
@@ -87,8 +104,21 @@ namespace DevHotelAPI.Controllers
             if (!_validator.Validate(customer).IsValid)
                 return BadRequest(_validator.Validate(customer).Errors);
 
-            await _repository.AddCustomerAsync(customer);
-            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customerDto);
+            try
+            {
+                await _repository.AddCustomerAsync(customer);
+                return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customerDto);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest("Error during saving customer in the database");
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest("Error during add customer to the database");
+            }
         }
 
         [HttpPut("{id}")]
@@ -110,16 +140,23 @@ namespace DevHotelAPI.Controllers
             try
             {
                 await _repository.UpdateCustomerAsync(customer, userName);
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!await _repository.CustomerExistsAsync(id))
                     return NotFound();
                 else
-                    throw;
+                {
+                    _logger.Error(ex.Message, ex);
+                    return BadRequest($"Error modifing customer with id {id}");
+                }
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"Error modifing customer with id {id}");
+            }
         }
     }
 }
