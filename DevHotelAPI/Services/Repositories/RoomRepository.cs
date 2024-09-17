@@ -19,14 +19,10 @@ namespace DevHotelAPI.Services.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteRoomAsync(int id)
+        public async Task DeleteRoomAsync(Room room)
         {
-            var room = await _context.Rooms.FindAsync(id);
-            if (room != null)
-            {
-                _context.Rooms.Remove(room);
-                await _context.SaveChangesAsync();
-            }
+            _context.Rooms.Remove(room);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Room?>> GetAllRoomAsync()
@@ -42,7 +38,7 @@ namespace DevHotelAPI.Services.Repositories
                          join types in _context.RoomTypes on room.RoomTypeId equals types.Id into t2
                          from t3 in t2
                          where
-                         t3.Capacity >= capacity && 
+                         t3.Capacity >= capacity &&
                          (r3 == null || !(fromDate < r3.To && toDate > r3.From))
                          select room;
 

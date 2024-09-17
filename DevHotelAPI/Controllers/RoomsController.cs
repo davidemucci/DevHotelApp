@@ -7,23 +7,19 @@ using AutoMapper;
 using DevHotelAPI.Dtos;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using Serilog.Core;
+using DevHotelAPI.Services.Repositories;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/rooms")]
     [ApiController]
-    public class RoomsController : ControllerBase
+    public class RoomsController(IMapper mapper, IRoomRepository repository, IValidator<Room> validator, Logger logger) : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly IRoomRepository _repository;
-        private readonly IValidator<Room> _validator;
-        public RoomsController(IMapper mapper, IRoomRepository repository, IValidator<Room> validator)
-        {
-            _mapper = mapper;
-            _repository = repository;
-            _validator = validator;
-
-        }
+        private readonly IMapper _mapper = mapper;
+        private readonly IRoomRepository _repository = repository;
+        private readonly IValidator<Room> _validator = validator;
+        private readonly Logger _logger = logger;
 
         [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
@@ -33,8 +29,16 @@ namespace DevHotelAPI.Controllers
             if (room == null)
                 return NotFound();
 
-            await _repository.DeleteRoomAsync(id);
-            return NoContent();
+            try
+            {
+                await _repository.DeleteRoomAsync(room);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message, ex);
+                return BadRequest($"Error deleting customer with id {id}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -52,6 +56,9 @@ namespace DevHotelAPI.Controllers
         public async Task<ActionResult<IEnumerable<RoomDto>>> GetRooms()
         {
             var rooms = await _repository.GetAllRoomAsync();
+            if(rooms == null)
+                return NotFound();
+
             return Ok(_mapper.Map<List<RoomDto>>(rooms));
         }
 
@@ -60,11 +67,15 @@ namespace DevHotelAPI.Controllers
         public async Task<ActionResult<IEnumerable<IGrouping<int, Room>>>> GetRoomsAvailable(DateTime from, DateTime to, int people)
         {
             var rooms = await _repository.GetAllRoomsAvailableAsync(from, to, people);
+
+            if(rooms == null)
+                return NotFound();
+
             var roomsDto = _mapper.Map<List<RoomDto>>(rooms);
 
             return Ok(roomsDto.GroupBy(x => x.RoomTypeId).OrderBy(x => x.Key).ToList());
         }
-    
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<ActionResult<RoomDto>> PostRoom(RoomDto roomDto)
@@ -73,9 +84,20 @@ namespace DevHotelAPI.Controllers
 
             if (!_validator.Validate(room).IsValid)
                 return BadRequest(_validator.Validate(room).Errors);
-
-            await _repository.AddRoomAsync(room);
-            return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
+            try
+            {
+                await _repository.AddRoomAsync(room);
+                return CreatedAtAction("GetRoom", new RoomDto { Number = room.Number }, _mapper.Map<RoomDto>(room));
+            }
+            catch(DbUpdateException) 
+            {
+                return BadRequest("Database error saving new room");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest("Error during app new room");
+            }
         }
 
         [Authorize(Roles = "Administrator")]
@@ -93,16 +115,29 @@ namespace DevHotelAPI.Controllers
             try
             {
                 await _repository.UpdateRoomAsync(room);
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
-                if (!await RoomExists(id))
+                var existingRoom = await _repository.GetByIdRoomAsync(id);
+                if (existingRoom == null)
                     return NotFound();
                 else
-                    throw;
+                {
+                    _logger.Error(ex.Message, ex);
+                    return BadRequest($"Database error updating room with id {id}");
+                }
             }
-
-            return NoContent();
+            catch (DbUpdateException ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"Database error updating room with id {id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"App Error updating room with id {id}");
+            }
         }
 
         private async Task<bool> RoomExists(int id)
