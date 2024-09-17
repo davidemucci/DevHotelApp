@@ -105,14 +105,6 @@ namespace DevHotelAPI.Controllers
 
             if (!_validator.Validate(customer).IsValid)
                 return BadRequest(_validator.Validate(customer).Errors);
-            try
-            {
-                await _repository.AddCustomerAsync(customer);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest();
-            }
 
             try
             {
