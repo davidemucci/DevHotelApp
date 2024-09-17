@@ -4,14 +4,12 @@ using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
-using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Moq;
+using Serilog;
 
 namespace DevHotelAppTest
 {
@@ -24,6 +22,7 @@ namespace DevHotelAppTest
         private readonly IMapper _mapper;   
         private readonly IRoomTypeRepository _repository;
         private readonly IValidator<RoomType> _validator;
+        private readonly ILogger _logger;
 
         public RoomTypesControllerTests(DatabaseFixture databaseFixture)
         {
@@ -31,9 +30,10 @@ namespace DevHotelAppTest
             databaseFixture.ResetContext();
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
+            _logger = databaseFixture._logger;
             _repository = new RoomTypeRepository(_context);
             _validator = (IValidator<RoomType>)new RoomTypeValidator();
-            _controller = new RoomTypesController( _mapper, _repository, _validator);
+            _controller = new RoomTypesController( _mapper, _repository, _validator, _logger);
         }
 
         [Fact]

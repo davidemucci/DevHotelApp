@@ -67,8 +67,6 @@ namespace DevHotelAPI.Controllers
             try
             {
                 var customer = await _repository.GetCustomerByIdAsync(id, userName);
-                if (customer == null)
-                    return NotFound();
 
                 var customerDto = _mapper.Map<CustomerDto>(customer);
                 return Ok(customerDto);
@@ -79,7 +77,7 @@ namespace DevHotelAPI.Controllers
             }
             catch(ArgumentNullException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

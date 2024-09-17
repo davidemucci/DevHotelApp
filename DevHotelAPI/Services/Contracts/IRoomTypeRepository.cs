@@ -8,6 +8,7 @@ namespace DevHotelAPI.Services.Contracts
         Task DeleteRoomTypeAsync(int id);
         Task<IEnumerable<RoomType>> GetAllRoomTypesAsync();
         Task<RoomType?> GetRoomTypeByIdAsync(int id);
+        Task<bool> RoomExistsAsync(int id);
         Task UpdateRoomTypeAsync(RoomType roomType);
     }
 }

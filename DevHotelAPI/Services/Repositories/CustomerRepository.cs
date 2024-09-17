@@ -70,6 +70,8 @@ namespace DevHotelAPI.Services.Repositories
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
             var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
+            customer.IdentityUserId = customer.IdentityUserId.Equals(Guid.Empty) ? user.Id : customer.IdentityUserId;
+
             if (isAdmin || user.Id.Equals(customer.IdentityUserId))
             {
                 _context.Entry(customer).State = EntityState.Modified;

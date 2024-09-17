@@ -40,7 +40,7 @@ namespace DevHotelAPI.Controllers
             }
             catch (ArgumentNullException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (DbUpdateException ex)
             {

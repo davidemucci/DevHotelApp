@@ -8,6 +8,7 @@ using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace DevHotelAppTest
         private readonly IMapper _mapper;
         private readonly IRoomRepository _repository;
         private readonly IValidator<Room> _validator;
+        private readonly ILogger _logger;
 
         public RoomsControllerTests(DatabaseFixture databaseFixture)
         {
@@ -31,9 +33,10 @@ namespace DevHotelAppTest
             databaseFixture.ResetContext();
             _context = databaseFixture._context;
             _mapper = databaseFixture.GetMapper();
+            _logger = databaseFixture._logger;
             _repository = new RoomRepository(_context);
             _validator = new RoomValidator();
-            _controller = new RoomsController(_mapper, _repository, _validator);
+            _controller = new RoomsController(_mapper, _repository, _validator, _logger);
         }
 
         [Fact]

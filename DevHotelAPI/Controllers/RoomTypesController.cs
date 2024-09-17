@@ -95,26 +95,21 @@ namespace DevHotelAPI.Controllers
             if (!_validator.Validate(roomType).IsValid)
                 return BadRequest(_validator.Validate(roomType).Errors);
 
+            var existingRoom = await _roomTypeRepository.RoomExistsAsync(id);
+            if (!existingRoom)
+                return NotFound();
+
             try
             {
                 await _roomTypeRepository.UpdateRoomTypeAsync(roomType);
                 return NoContent();
             }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                var existingRoom = await _roomTypeRepository.GetRoomTypeByIdAsync(id);
-                if (existingRoom == null)
-                    return NotFound();
-                else
-                {
-                    _logger.Error(ex.Message, ex);
-                    return BadRequest($"Database error updating roomType with id {id}");
-                }
-            }
             catch (DbUpdateException ex)
             {
+
                 _logger.Error(ex.Message, ex);
                 return BadRequest($"Database error updating roomType with id {id}");
+
             }
             catch (Exception ex)
             {

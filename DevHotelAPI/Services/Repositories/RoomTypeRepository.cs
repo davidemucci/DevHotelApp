@@ -43,6 +43,11 @@ namespace DevHotelAPI.Services.Repositories
             _context.Entry(roomType).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> RoomExistsAsync(int id)
+        {
+           return await _context.RoomTypes.AnyAsync(i => i.Id == id);
+        }
     }
 
 }

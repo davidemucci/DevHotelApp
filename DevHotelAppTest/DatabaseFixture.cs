@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Client;
+using Serilog;
+using Serilog.Core;
 using System.Security.Claims;
 
 namespace DevHotelAppTest
@@ -23,6 +25,7 @@ namespace DevHotelAppTest
         public HotelDevContext _context { get; private set; }
         public IdentityContext _identityContext { get; private set; }
         public UserManager<IdentityUser<Guid>> _userManager;
+        public ILogger _logger { get; private set; }
         public DatabaseFixture()
         {
 
@@ -87,6 +90,10 @@ namespace DevHotelAppTest
             _identityContext = new IdentityContext(optionsIdentity, _bogusRepo, env);
             var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(_identityContext);
             _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null, null, null, null, null, null, null, null);
+            _logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .CreateLogger();
+
             _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
 

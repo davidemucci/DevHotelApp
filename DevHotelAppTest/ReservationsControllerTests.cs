@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Serilog.Core;
 using System.Security.Claims;
 
 namespace DevHotelAppTest
@@ -27,6 +29,7 @@ namespace DevHotelAppTest
         private readonly IReservationRepository _repository;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Reservation> _validator;
+        private readonly ILogger _logger;
 
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
@@ -36,9 +39,10 @@ namespace DevHotelAppTest
             _identityContext = databaseFixture._identityContext;
             _mapper = databaseFixture.GetMapper();
             _userManager = databaseFixture._userManager;
+            _logger = databaseFixture._logger;
             _repository = new ReservationRepository(_context, _identityContext, _userManager);
             _validator = new ReservationValidator();
-            _controller = new ReservationsController(_mapper, _repository, _validator);
+            _controller = new ReservationsController(_mapper, _repository, _validator, _logger);
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
 
         }
@@ -66,7 +70,7 @@ namespace DevHotelAppTest
             var result = await _controller.DeleteReservation(invalidId);
 
             // Assert
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
@@ -309,7 +313,7 @@ namespace DevHotelAppTest
             var result = await _controller.PutReservation(validId, reservationDto);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
@@ -386,7 +390,7 @@ namespace DevHotelAppTest
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 101

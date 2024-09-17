@@ -10,6 +10,7 @@ using DevHotelAPI.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace DevHotelAppTest
 {
@@ -23,6 +24,7 @@ namespace DevHotelAppTest
         private readonly ICustomerRepository _repository;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Customer> _validator;
+        private readonly ILogger _logger;
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {
@@ -31,10 +33,11 @@ namespace DevHotelAppTest
             _identityContext = databaseFixture._identityContext;
             _userManager = databaseFixture._userManager;    
             _context = databaseFixture._context;
+            _logger = databaseFixture._logger;  
             _mapper = databaseFixture.GetMapper();
             _repository = new CustomerRepository(_context, _userManager);
             _validator = new CustomerValidator();
-            _controller = new CustomerController(_mapper, _repository, _validator);
+            _controller = new CustomerController(_logger, _mapper, _repository, _validator);
 
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
@@ -63,7 +66,7 @@ namespace DevHotelAppTest
             var isNotDeleted = await _repository.CustomerExistsAsync(customerId);
 
             // Assert
-            Assert.IsType<NoContentResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
             Assert.True(isNotDeleted);
         }
 
@@ -92,7 +95,7 @@ namespace DevHotelAppTest
             var result = await _controller.GetCustomer(customerId);
 
             // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
@@ -133,7 +136,7 @@ namespace DevHotelAppTest
         public async Task PutCustomer_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var customerDto = new CustomerDto { 
                 Id = customerId, 
                 Name = "Updated Customer",
