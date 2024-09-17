@@ -22,15 +22,14 @@ namespace DevHotelAppTest
     public class ReservationsControllerTests : IClassFixture<DatabaseFixture>
     {
         private readonly HotelDevContext _context;
-        private readonly IdentityContext _identityContext;
         private readonly ReservationsController _controller;
         private readonly DatabaseFixture _databaseFixture;
+        private readonly IdentityContext _identityContext;
+        private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IReservationRepository _repository;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Reservation> _validator;
-        private readonly ILogger _logger;
-
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
             _databaseFixture = databaseFixture;
@@ -48,19 +47,6 @@ namespace DevHotelAppTest
         }
 
         [Fact]
-        public async Task DeleteReservationOfOtherCustomerAsAdmin_ReturnsNoContent_WhenDeletionIsSuccessful()
-        {
-            // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
-
-            // Act
-            var result = await _controller.DeleteReservation(validId);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
         public async Task DeleteReservation_ReturnsNotFound_WhenIdIsInvalid()
         {
             // Arrange
@@ -73,6 +59,18 @@ namespace DevHotelAppTest
             Assert.IsType<NotFoundObjectResult>(result);
         }
 
+        [Fact]
+        public async Task DeleteReservationOfOtherCustomerAsAdmin_ReturnsNoContent_WhenDeletionIsSuccessful()
+        {
+            // Arrange
+            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
+
+            // Act
+            var result = await _controller.DeleteReservation(validId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
         [Fact]
         public async Task GetReservation_ReturnsNotFound_WhenIdIsInvalid()
         {
