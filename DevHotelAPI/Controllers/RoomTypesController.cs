@@ -6,31 +6,37 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Core;
 
 namespace DevHotelAPI.Controllers
 {
     [ApiController]
     [Route("api/room-types")]
-    public class RoomTypesController : ControllerBase
+    public class RoomTypesController(IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator, Logger logger) : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly IRoomTypeRepository _roomTypeRepository;
-        private readonly IValidator<RoomType> _validator;
-
-
-        public RoomTypesController(IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator)
-        {
-            _mapper = mapper;
-            _roomTypeRepository = roomTypeRepository;
-            _validator = validator;
-        }
+        private readonly IMapper _mapper = mapper;
+        private readonly IRoomTypeRepository _roomTypeRepository = roomTypeRepository;
+        private readonly IValidator<RoomType> _validator = validator;
+        private readonly Logger _logger = logger;
 
         [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoomType(int id)
         {
-            await _roomTypeRepository.DeleteRoomTypeAsync(id);
-            return NoContent();
+            try
+            {
+                await _roomTypeRepository.DeleteRoomTypeAsync(id);
+                return NoContent();
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex.Message, ex);
+                return BadRequest($"Error deleting customer with id {id}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -58,9 +64,22 @@ namespace DevHotelAPI.Controllers
 
             if (!_validator.Validate(roomType).IsValid)
                 return BadRequest(_validator.Validate(roomType).Errors);
+            try
+            {
+                await _roomTypeRepository.AddRoomTypeAsync(roomType);
 
-            await _roomTypeRepository.AddRoomTypeAsync(roomType);
-            return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
+                return CreatedAtAction(nameof(GetRoomType), new { id = roomType.Id }, roomType);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest("Error during saving roomType in the database");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest("Error during add roomType to the database");
+            }
         }
 
         [Authorize(Roles = "Administrator")]
@@ -78,19 +97,29 @@ namespace DevHotelAPI.Controllers
             try
             {
                 await _roomTypeRepository.UpdateRoomTypeAsync(roomType);
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 var existingRoom = await _roomTypeRepository.GetRoomTypeByIdAsync(id);
                 if (existingRoom == null)
                     return NotFound();
+                else
+                {
+                    _logger.Error(ex.Message, ex);
+                    return BadRequest($"Database error updating roomType with id {id}");
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"Database error updating roomType with id {id}");
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"App Error updating roomType with id {id}");
             }
-
-            return NoContent();
         }
     }
 }

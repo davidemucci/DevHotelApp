@@ -6,14 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Services.Repositories
 {
-    public class RoomTypeRepository : IRoomTypeRepository
+    public class RoomTypeRepository(HotelDevContext context) : IRoomTypeRepository
     {
-        private readonly HotelDevContext _context;
-
-        public RoomTypeRepository(HotelDevContext context)
-        {
-            _context = context;
-        }
+        private readonly HotelDevContext _context = context;
 
         public async Task AddRoomTypeAsync(RoomType roomType)
         {
@@ -23,12 +18,11 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task DeleteRoomTypeAsync(int id)
         {
-            var roomType = await _context.RoomTypes.FindAsync(id);
-            if (roomType != null)
-            {
-                _context.RoomTypes.Remove(roomType);
-                await _context.SaveChangesAsync();
-            }
+            var roomType = await _context.RoomTypes.FindAsync(id) ??
+                throw new ArgumentNullException($"Room Type with id {id} not found in the db.");
+
+            _context.RoomTypes.Remove(roomType);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<RoomType>> GetAllRoomTypesAsync()
@@ -38,12 +32,13 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task<RoomType?> GetRoomTypeByIdAsync(int id)
         {
-            return await _context.RoomTypes.Where(r => r.Id.Equals(id)).AsNoTracking().FirstOrDefaultAsync();
+            return await _context.RoomTypes.FindAsync(id);
         }
+
         public async Task UpdateRoomTypeAsync(RoomType roomType)
         {
             if (roomType.Id == 0)
-                throw new ArgumentNullException(nameof(roomType.Id));
+                throw new ArgumentNullException(null, "Invalid RoomType Id");
 
             _context.Entry(roomType).State = EntityState.Modified;
             await _context.SaveChangesAsync();
