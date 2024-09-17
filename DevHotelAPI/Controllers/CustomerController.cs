@@ -96,13 +96,23 @@ namespace DevHotelAPI.Controllers
             return Ok(customerDtos);
         }
 
+
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<CustomerDto>> PostCustomer(CustomerDto customerDto)
         {
             var customer = _mapper.Map<Customer>(customerDto);
 
             if (!_validator.Validate(customer).IsValid)
                 return BadRequest(_validator.Validate(customer).Errors);
+            try
+            {
+                await _repository.AddCustomerAsync(customer);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
 
             try
             {
