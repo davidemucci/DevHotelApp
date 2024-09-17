@@ -6,18 +6,19 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Core;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace DevHotelAPI.Controllers
 {
     [ApiController]
     [Route("api/room-types")]
-    public class RoomTypesController(IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator, Logger logger) : ControllerBase
+    public class RoomTypesController(IMapper mapper, IRoomTypeRepository roomTypeRepository, IValidator<RoomType> validator, ILogger logger) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly IRoomTypeRepository _roomTypeRepository = roomTypeRepository;
         private readonly IValidator<RoomType> _validator = validator;
-        private readonly Logger _logger = logger;
+        private readonly ILogger _logger = logger;
 
         [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]

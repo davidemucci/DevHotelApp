@@ -12,19 +12,20 @@ using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Serilog.Core;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/customers")]
     [Authorize(Roles = "Consumer,Administrator")]
     [ApiController]
-    public class CustomerController(Logger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
+    public class CustomerController(ILogger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly ICustomerRepository _repository = repository;
         private readonly IValidator<Customer> _validator = validator;
-        private readonly Logger _logger = logger;
+        private readonly ILogger _logger = logger;
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)

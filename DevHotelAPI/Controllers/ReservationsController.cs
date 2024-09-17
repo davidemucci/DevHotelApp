@@ -1,28 +1,25 @@
 ﻿using AutoMapper;
-using Azure;
-using Azure.Core;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Core;
-using System.Security.Claims;
+using ILogger = Serilog.ILogger;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/reservations")]
     [Authorize(Roles = "Administrator,Consumer")]
     [ApiController]
-    public class ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, Logger logger) : ControllerBase
+    public class ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, ILogger logger) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly IReservationRepository _repository = repository;
         private readonly IValidator<Reservation> _validator = validator;
-        private readonly Logger _logger = logger;
+        private readonly ILogger _logger = logger;
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
@@ -37,7 +34,7 @@ namespace DevHotelAPI.Controllers
                 await _repository.DeleteReservationAsync(id, userName);
                 return NoContent();
             }
-            catch(UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -45,7 +42,7 @@ namespace DevHotelAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch(DbUpdateException ex)
+            catch (DbUpdateException ex)
             {
                 _logger.Error(ex.Message, ex);
                 return BadRequest($"Database error deleting reservation with id {id}");
@@ -82,7 +79,7 @@ namespace DevHotelAPI.Controllers
             {
                 _logger.Error(ex.Message, ex);
                 return BadRequest($"Error getting reservation with id {id}");
-            }  
+            }
         }
 
         [HttpGet]
@@ -95,7 +92,7 @@ namespace DevHotelAPI.Controllers
             try
             {
                 var reservations = await _repository.GetReservationsByCustomerIdAsync(customerId, userName);
-                if(reservations is null)
+                if (reservations is null)
                     return NotFound();
 
                 return Ok(_mapper.Map<List<ReservationDto>>(reservations));
@@ -117,7 +114,7 @@ namespace DevHotelAPI.Controllers
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservations()
         {
             var reservations = await _repository.GetAllReservationsAsync();
-            if(reservations is null)
+            if (reservations is null)
                 return NotFound();
 
             var reservationDtos = _mapper.Map<IEnumerable<ReservationDto>>(reservations);
@@ -145,11 +142,11 @@ namespace DevHotelAPI.Controllers
                 await _repository.AddReservationAsync(reservation, userName);
                 return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
             }
-            catch(UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);  
+                return BadRequest(ex.Message);
             }
-            catch(DbUpdateException ex)
+            catch (DbUpdateException ex)
             {
                 _logger.Error(ex.Message, ex);
                 return BadRequest($"Database error saving reservation for user {userName}");
@@ -171,33 +168,31 @@ namespace DevHotelAPI.Controllers
 
             if (id != reservationDto.Id)
                 return BadRequest("Id param and reservation Id are not the same");
-
-            var reservation = _mapper.Map<Reservation>(reservationDto);
-
-            if (!_validator.Validate(reservation).IsValid)
-                return BadRequest(_validator.Validate(reservation).Errors);
-
-            if (!await _repository.CheckIfRoomIsAvailableAsync(reservation))
-                return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
+            if (!await _repository.ReservationExistsAsync(id))
+                return NotFound();
 
             try
             {
+
+                var reservation = _mapper.Map<Reservation>(reservationDto);
+
+                if (!_validator.Validate(reservation).IsValid)
+                    return BadRequest(_validator.Validate(reservation).Errors);
+
+                if (!await _repository.CheckIfRoomIsAvailableAsync(reservation))
+                    return BadRequest("The selected room is not available for the specified dates. Please choose different dates or another room.");
+
                 await _repository.UpdateReservationAsync(reservation, userName);
                 return NoContent();
             }
-            catch(UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message); 
+                return BadRequest(ex.Message);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateException ex)
             {
-                if (!await _repository.ReservationExistsAsync(id))
-                    return NotFound();
-                else
-                {
-                    _logger.Error(ex.Message, ex);
-                    return BadRequest($"Error modifing customer with id {id}");
-                }
+                _logger.Error(ex.Message, ex);
+                return BadRequest($"Error modifing customer with id {id}");
             }
             catch (Exception ex)
             {

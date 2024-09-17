@@ -5,21 +5,19 @@ using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using AutoMapper;
 using DevHotelAPI.Dtos;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
-using Serilog.Core;
-using DevHotelAPI.Services.Repositories;
+using ILogger = Serilog.ILogger;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/rooms")]
     [ApiController]
-    public class RoomsController(IMapper mapper, IRoomRepository repository, IValidator<Room> validator, Logger logger) : ControllerBase
+    public class RoomsController(IMapper mapper, IRoomRepository repository, IValidator<Room> validator, ILogger logger) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly IRoomRepository _repository = repository;
         private readonly IValidator<Room> _validator = validator;
-        private readonly Logger _logger = logger;
+        private readonly ILogger _logger = logger;
 
         [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
