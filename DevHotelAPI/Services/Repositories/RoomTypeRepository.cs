@@ -32,7 +32,6 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task<RoomType?> GetRoomTypeByIdAsync(int id)
         {
-            _context.Entry
             return await _context.RoomTypes.FindAsync(id);
         }
 
