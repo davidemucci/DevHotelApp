@@ -22,22 +22,23 @@ namespace DevHotelAPI.Services.Repositories
         }
 
         public async Task AddReservationAsync(Reservation reservation, string userName)
-        {   
-            var user = await _userManager.FindByNameAsync(userName);
-            if(user == null)
-                return; 
+        {
+            var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
-            if(
-                await _context.Customers.Where(c => c.IdentityUserId.Equals(user.Id) && c.Id.Equals(reservation.CustomerId)).AnyAsync() || 
-                await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString()))
+            if
+            (
+                await _context.Customers.Where(c => c.IdentityUserId.Equals(user.Id) && c.Id.Equals(reservation.CustomerId)).AnyAsync() ||
+                isAdmin
+            )
             {
                 await _context.Reservations.AddAsync(reservation);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                throw new InvalidOperationException("User is not authorized to make a reservation.");
-            } 
+                throw new UnauthorizedAccessException("User is not authorized to make a reservation.");
+            }
 
         }
 
@@ -49,11 +50,10 @@ namespace DevHotelAPI.Services.Repositories
             );
         }
 
-        public async Task DeleteReservationAsync(Guid id,string userName)
+        public async Task DeleteReservationAsync(Guid id, string userName)
         {
-            var identityUser = await _userManager.FindByNameAsync(userName);
-            if (identityUser == null)
-                return;
+            var identityUser = await _userManager.FindByNameAsync(userName) ?? 
+                throw new UnauthorizedAccessException($"User not found with username {userName}");
 
             var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
@@ -63,9 +63,8 @@ namespace DevHotelAPI.Services.Repositories
                                    where res.Id == id && (u3.IdentityUserId == identityUser.Id || isAdmin)
                                    select res;
 
-            var reservation = await reservationQuery.FirstOrDefaultAsync();
-            if (reservation is null)
-                throw new Exception("No reservation was found linked to your account. Please ensure that the reservation ID is correct and that it is associated with your account.");
+            var reservation = await reservationQuery.FirstOrDefaultAsync() ??
+                throw new ArgumentNullException("No reservation was found linked to your account. Please ensure that the reservation ID is correct and that it is associated with your account.");
 
             _context.Reservations.Remove(reservation);
             await _context.SaveChangesAsync();
@@ -76,42 +75,36 @@ namespace DevHotelAPI.Services.Repositories
             return await _context.Reservations.ToListAsync();
         }
 
-        public async Task<Reservation?> GetReservationByIdAsync(Guid id,string userName)
+        public async Task<Reservation?> GetReservationByIdAsync(Guid id, string userName)
         {
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user == null)
-                return null;
+            var user = await _userManager.FindByNameAsync(userName) 
+                ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
 
             var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
             IQueryable<Reservation> reseservationQuery;
 
-            if (isAdmin)
-                reseservationQuery = _context.Reservations.Where(r => r.Id.Equals(id));
-            else
-                reseservationQuery = from res in _context.Reservations
-                                     join cust in _context.Customers on res.CustomerId equals cust.Id into u2
-                                     from u3 in u2
-                                     where res.Id == id && u3.IdentityUserId == user.Id
-                                     select res;
+            reseservationQuery = from res in _context.Reservations
+                                 join cust in _context.Customers on res.CustomerId equals cust.Id into u2
+                                 from u3 in u2
+                                 where res.Id == id && (u3.IdentityUserId == user.Id || isAdmin)
+                                 select res;
 
             return await reseservationQuery.FirstOrDefaultAsync();
         }
-        
+
         public async Task<IEnumerable<Reservation?>> GetReservationsByCustomerIdAsync(Guid clientId, string userName)
         {
-            var identityUser = await _userManager.FindByNameAsync(userName);
-            if (identityUser == null)
-                return null;
+            var identityUser = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
 
             var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
 
             IQueryable<Reservation> reservationQuery = from res in _context.Reservations
-                                                       join cus in _context.Customers on res.CustomerId equals cus.Id into u2   
+                                                       join cus in _context.Customers on res.CustomerId equals cus.Id into u2
                                                        from cus3 in u2
                                                        where isAdmin || identityUser.Id == cus3.IdentityUserId
                                                        select res;
 
-            
+
             return await reservationQuery.ToListAsync();
         }
 
@@ -122,19 +115,22 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task UpdateReservationAsync(Reservation reservation, string userName)
         {
-            var identityUser = await _userManager.FindByNameAsync(userName);
-          
-            if (identityUser == null)
-                return;
+            var identityUser = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
 
-            var user = _context.Customers.Where(c => c.IdentityUserId.Equals(identityUser.Id)).FirstOrDefault();
-            var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
-            if (isAdmin || user.Id == reservation.CustomerId)
+            var isItsOwnReservation = await _context.Customers.Where(c => 
+                c.IdentityUserId.Equals(identityUser.Id) && 
+                reservation.CustomerId.Equals(c.Id)).AnyAsync();
+
+            var isAdmin = await _userManager.IsInRoleAsync(
+               identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+
+            if (isAdmin || isItsOwnReservation)
             {
                 _context.Entry(reservation).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-
             }
+            else
+                throw new UnauthorizedAccessException($"Customer not found with IdentityUserId {identityUser.Id}");
         }
     }
 }

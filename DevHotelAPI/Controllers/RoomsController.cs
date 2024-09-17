@@ -139,11 +139,5 @@ namespace DevHotelAPI.Controllers
                 return BadRequest($"App Error updating room with id {id}");
             }
         }
-
-        private async Task<bool> RoomExists(int id)
-        {
-            var room = await _repository.GetByIdRoomAsync(id);
-            return room != null;
-        }
     }
 }
