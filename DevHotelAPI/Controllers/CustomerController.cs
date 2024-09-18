@@ -14,22 +14,24 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using ILogger = Serilog.ILogger;
+using DevHotelAPI.Services;
 
 namespace DevHotelAPI.Controllers
 {
     [Route("api/customers")]
     [Authorize(Roles = "Consumer,Administrator")]
     [ApiController]
-    public class CustomerController(ILogger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
+    public class CustomerController(HandleExceptionService handleExceptionService, ILogger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly ICustomerRepository _repository = repository;
         private readonly IValidator<Customer> _validator = validator;
         private readonly ILogger _logger = logger;
+        private readonly HandleExceptionService _handleExceptionService = handleExceptionService;
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)
-        {
+        { 
             var userName = User.Identity?.Name;
 
             if (string.IsNullOrEmpty(userName))
@@ -42,17 +44,9 @@ namespace DevHotelAPI.Controllers
                 await _repository.DeleteCustomerAsync(id, userName);
                 return NoContent();
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }catch(ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message, ex);
-                return BadRequest($"Error deleting customer with id {id}");
+                return _handleExceptionService.HandleException(ex, id, "deleting", "Customer");
             }
         }
 
@@ -71,18 +65,9 @@ namespace DevHotelAPI.Controllers
                 var customerDto = _mapper.Map<CustomerDto>(customer);
                 return Ok(customerDto);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch(ArgumentNullException ex)
-            {
-                return NotFound(ex.Message);
-            }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error getting customer with id {id}");
+                return _handleExceptionService.HandleException(ex, id, "getting", "Customer");
             }
         }
 
@@ -110,15 +95,9 @@ namespace DevHotelAPI.Controllers
                 await _repository.AddCustomerAsync(customer);
                 return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customerDto);
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest("Error during saving customer in the database");
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                return BadRequest("Error during add customer to the database");
+                return _handleExceptionService.HandleException(ex, customer.Id, "adding", "Customer");
             }
         }
 
@@ -155,8 +134,7 @@ namespace DevHotelAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error modifing customer with id {id}");
+                return _handleExceptionService.HandleException(ex, customer.Id, "updating", "Customer");
             }
         }
     }
