@@ -4,6 +4,7 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
+using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
@@ -17,7 +18,7 @@ using Serilog;
 using Serilog.Core;
 using System.Security.Claims;
 
-namespace DevHotelAppTest
+namespace DevHotelAppTest.IntegrationTests
 {
     public class ReservationsControllerTests : IClassFixture<DatabaseFixture>
     {
@@ -30,6 +31,7 @@ namespace DevHotelAppTest
         private readonly IReservationRepository _repository;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Reservation> _validator;
+        private readonly HandleExceptionService _handlerExceptionService;
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
             _databaseFixture = databaseFixture;
@@ -41,7 +43,8 @@ namespace DevHotelAppTest
             _logger = databaseFixture._logger;
             _repository = new ReservationRepository(_context, _identityContext, _userManager);
             _validator = new ReservationValidator();
-            _controller = new ReservationsController(_mapper, _repository, _validator, _logger);
+            _handlerExceptionService = _databaseFixture._handleExceptionService;
+            _controller = new ReservationsController(_handlerExceptionService, _mapper, _repository, _validator, _logger);
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
 
         }

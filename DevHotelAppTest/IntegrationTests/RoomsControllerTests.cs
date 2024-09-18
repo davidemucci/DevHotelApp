@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DevHotelAppTest
+namespace DevHotelAppTest.IntegrationTests
 {
     public class RoomsControllerTests : IClassFixture<DatabaseFixture>
     {

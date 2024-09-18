@@ -4,6 +4,7 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
+using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Validators;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace DevHotelAppTest
+namespace DevHotelAppTest.IntegrationTests
 {
     public class CustomersControllerTests : IClassFixture<DatabaseFixture>
     {
@@ -25,20 +26,22 @@ namespace DevHotelAppTest
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Customer> _validator;
         private readonly ILogger _logger;
+        private readonly HandleExceptionService _handleExceptionService;
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {
             databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
             _identityContext = databaseFixture._identityContext;
-            _userManager = databaseFixture._userManager;    
+            _userManager = databaseFixture._userManager;
             _context = databaseFixture._context;
-            _logger = databaseFixture._logger;  
+            _logger = databaseFixture._logger;
             _mapper = databaseFixture.GetMapper();
             _repository = new CustomerRepository(_context, _userManager);
             _validator = new CustomerValidator();
-            _controller = new CustomerController(_logger, _mapper, _repository, _validator);
-
+            _handleExceptionService = _databaseFixture._handleExceptionService;
+            _controller = new CustomerController(_handleExceptionService, _logger, _mapper, _repository, _validator);
+            
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
 
@@ -107,7 +110,7 @@ namespace DevHotelAppTest
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<CustomerDto>>(okResult.Value);
-            Assert.Equal(2, returnValue.Count); 
+            Assert.Equal(2, returnValue.Count);
         }
         [Fact]
         public async Task PostCustomer_CreatesCustomer_WhenModelIsValid()
@@ -137,8 +140,9 @@ namespace DevHotelAppTest
         {
             // Arrange
             var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            var customerDto = new CustomerDto { 
-                Id = customerId, 
+            var customerDto = new CustomerDto
+            {
+                Id = customerId,
                 Name = "Updated Customer",
                 Email = "newcustomeremail@email.com",
                 Password = "password1234!",

@@ -26,6 +26,9 @@ namespace DevHotelAppTest
         public IdentityContext _identityContext { get; private set; }
         public UserManager<IdentityUser<Guid>> _userManager;
         public ILogger _logger { get; private set; }
+        public HandleExceptionService _handleExceptionService { get; private set; }
+
+
         public DatabaseFixture()
         {
 
@@ -94,6 +97,8 @@ namespace DevHotelAppTest
                     .WriteTo.Console()
                     .CreateLogger();
 
+            
+            _handleExceptionService = new HandleExceptionService(_logger);
             _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
 

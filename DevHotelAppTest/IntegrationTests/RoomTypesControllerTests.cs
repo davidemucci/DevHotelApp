@@ -11,7 +11,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace DevHotelAppTest
+namespace DevHotelAppTest.IntegrationTests
 {
     [Collection("DatabaseCollection")]
     public class RoomTypesControllerTests : IClassFixture<DatabaseFixture>
@@ -19,7 +19,7 @@ namespace DevHotelAppTest
         private readonly HotelDevContext _context;
         private readonly RoomTypesController _controller;
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IMapper _mapper;   
+        private readonly IMapper _mapper;
         private readonly IRoomTypeRepository _repository;
         private readonly IValidator<RoomType> _validator;
         private readonly ILogger _logger;
@@ -32,8 +32,8 @@ namespace DevHotelAppTest
             _mapper = databaseFixture.GetMapper();
             _logger = databaseFixture._logger;
             _repository = new RoomTypeRepository(_context);
-            _validator = (IValidator<RoomType>)new RoomTypeValidator();
-            _controller = new RoomTypesController( _mapper, _repository, _validator, _logger);
+            _validator = new RoomTypeValidator();
+            _controller = new RoomTypesController(_mapper, _repository, _validator, _logger);
         }
 
         [Fact]
