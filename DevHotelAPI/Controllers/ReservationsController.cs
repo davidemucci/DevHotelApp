@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
+using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +15,14 @@ namespace DevHotelAPI.Controllers
     [Route("api/reservations")]
     [Authorize(Roles = "Administrator,Consumer")]
     [ApiController]
-    public class ReservationsController(IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, ILogger logger) : ControllerBase
+    public class ReservationsController(HandleExceptionService handleExceptionService, IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, ILogger logger) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly IReservationRepository _repository = repository;
         private readonly IValidator<Reservation> _validator = validator;
         private readonly ILogger _logger = logger;
+        private readonly HandleExceptionService _handleExceptionService = handleExceptionService;
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
@@ -34,23 +37,9 @@ namespace DevHotelAPI.Controllers
                 await _repository.DeleteReservationAsync(id, userName);
                 return NoContent();
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Database error deleting reservation with id {id}");
-            }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error deleting reservation with id {id}");
+                return _handleExceptionService.HandleException(ex, id, "deleting", "Reservation");  
             }
         }
 
@@ -71,14 +60,9 @@ namespace DevHotelAPI.Controllers
                 var reservationDto = _mapper.Map<ReservationDto>(reservation);
                 return Ok(reservationDto);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error getting reservation with id {id}");
+                return _handleExceptionService.HandleException(ex, id, "getting", "Reservation");
             }
         }
 
@@ -104,7 +88,7 @@ namespace DevHotelAPI.Controllers
             catch (Exception ex)
             {
                 _logger.Error(ex.Message, ex);
-                return BadRequest($"Error getrting reservation for customer with id {customerId}");
+                return BadRequest($"Error getting reservation for customer with id {customerId}");
             }
 
         }
@@ -142,19 +126,9 @@ namespace DevHotelAPI.Controllers
                 await _repository.AddReservationAsync(reservation, userName);
                 return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Database error saving reservation for user {userName}");
-            }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error adding reservation for user {userName}.");
+                return _handleExceptionService.HandleException(ex, reservation.Id, "saving", "Reservation");
             }
         }
 
@@ -185,19 +159,9 @@ namespace DevHotelAPI.Controllers
                 await _repository.UpdateReservationAsync(reservation, userName);
                 return NoContent();
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.Error(ex.Message, ex);
-                return BadRequest($"Error modifing customer with id {id}");
-            }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message, ex);
-                return BadRequest($"Can't modify the reservation with id {id}");
+                return _handleExceptionService.HandleException(ex, id, "updating", "Reservation");
             }
         }
     }

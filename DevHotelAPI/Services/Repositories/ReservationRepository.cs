@@ -37,7 +37,7 @@ namespace DevHotelAPI.Services.Repositories
             }
             else
             {
-                throw new UnauthorizedAccessException("User is not authorized to make a reservation.");
+                throw new UnauthorizedAccessException($"User {userName} is not authorized to make a reservation.");
             }
 
         }
@@ -101,7 +101,7 @@ namespace DevHotelAPI.Services.Repositories
             IQueryable<Reservation> reservationQuery = from res in _context.Reservations
                                                        join cus in _context.Customers on res.CustomerId equals cus.Id into u2
                                                        from cus3 in u2
-                                                       where isAdmin || identityUser.Id == cus3.IdentityUserId
+                                                       where res.CustomerId == clientId && (isAdmin || identityUser.Id == cus3.IdentityUserId)
                                                        select res;
 
 

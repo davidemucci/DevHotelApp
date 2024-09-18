@@ -120,6 +120,7 @@ try
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
     builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
     builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+    builder.Services.AddScoped<HandleExceptionService>();
 
 
     builder.Services.AddAutoMapper(typeof(MainMapperProfile));
