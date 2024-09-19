@@ -19,31 +19,21 @@ namespace DevHotelAppTest.IntegrationTests
 {
     public class RoomsControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly HotelDevContext _context;
         private readonly RoomsController _controller;
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IMapper _mapper;
-        private readonly IRoomRepository _repository;
-        private readonly IValidator<Room> _validator;
-        private readonly ILogger _logger;
 
         public RoomsControllerTests(DatabaseFixture databaseFixture)
         {
-            _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            _context = databaseFixture._context;
-            _mapper = databaseFixture.GetMapper();
-            _logger = databaseFixture._logger;
-            _repository = new RoomRepository(_context);
-            _validator = new RoomValidator();
-            _controller = new RoomsController(_mapper, _repository, _validator, _logger);
+            _databaseFixture = databaseFixture;
+            _controller = new RoomsController(_databaseFixture.GetMapper(), new RoomRepository(_databaseFixture._context), new RoomValidator(), _databaseFixture._logger);
         }
 
         [Fact]
         public async Task DeleteRoom_ReturnsNoContent_WhenRoomIsDeleted()
         {
             // Arrange
-            var roomId = 100;
+            var roomId = _databaseFixture.roomsId.First();
 
             // Act
             var result = await _controller.DeleteRoom(roomId);
@@ -69,7 +59,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task GetRoom_ReturnsRoom_WhenRoomExists()
         {
             // Arrange
-            var roomId = 100;
+            var roomId = _databaseFixture.roomsId.First();
 
             // Act
             var result = await _controller.GetRoom(roomId);
@@ -89,7 +79,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<RoomDto>>(okResult.Value);
-            Assert.Equal(10, returnValue.Count);
+            Assert.Equal(_databaseFixture.roomsId.Count, returnValue.Count);
         }
 
         [Fact]
@@ -179,7 +169,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task PutRoom_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var roomId = 100;
+            var roomId = _databaseFixture.roomsId.First(); ;
             var roomDto = new RoomDto { Number = roomId, Description = "Updated Room", RoomTypeId = 2 };
 
             // Act

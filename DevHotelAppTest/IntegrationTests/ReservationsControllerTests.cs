@@ -22,31 +22,17 @@ namespace DevHotelAppTest.IntegrationTests
 {
     public class ReservationsControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly HotelDevContext _context;
         private readonly ReservationsController _controller;
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IdentityContext _identityContext;
-        private readonly ILogger _logger;
-        private readonly IMapper _mapper;
-        private readonly IReservationRepository _repository;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
-        private readonly IValidator<Reservation> _validator;
-        private readonly IHandleExceptionService _handlerExceptionService;
+
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
-            _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            _context = databaseFixture._context;
-            _identityContext = databaseFixture._identityContext;
-            _mapper = databaseFixture.GetMapper();
-            _userManager = databaseFixture._userManager;
-            _logger = databaseFixture._logger;
-            _repository = new ReservationRepository(_context, _identityContext, _userManager);
-            _validator = new ReservationValidator();
-            _handlerExceptionService = _databaseFixture._handleExceptionService;
-            _controller = new ReservationsController(_handlerExceptionService, _mapper, _repository, _validator, _logger);
+            _databaseFixture = databaseFixture;
+            _controller = new ReservationsController(_databaseFixture._handleExceptionService, _databaseFixture.GetMapper(),
+                new ReservationRepository(_databaseFixture._context, _databaseFixture._identityContext, _databaseFixture._userManager),
+                new ReservationValidator(), _databaseFixture._logger);
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
-
         }
 
         [Fact]
@@ -66,7 +52,8 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task DeleteReservationOfOtherCustomerAsAdmin_ReturnsNoContent_WhenDeletionIsSuccessful()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
+            var validId = _databaseFixture.reservationsId.Last();
+            _databaseFixture.SetHttpContextAsAdminUser(_controller);
 
             // Act
             var result = await _controller.DeleteReservation(validId);
@@ -91,7 +78,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task GetReservation_ReturnsReservation_WhenIdIsValid()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111112");
+            var validId = _databaseFixture._context.Reservations.Where(c => c.CustomerId.Equals(_databaseFixture.consumerId)).Select(c => c.Id).First();
 
             // Act
             var result = await _controller.GetReservation(validId);
@@ -106,7 +93,8 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task GetReservationByCustomerId_ReturnsOkResult_WithListOfReservationDtos()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var customerId = _databaseFixture.consumerId;
+
             var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.Name, "CONSUMER")
@@ -135,7 +123,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<ReservationDto>>(okResult.Value);
-            Assert.Equal(5, returnValue.Count); // Adjust the expected count as needed
+            Assert.Equal(_databaseFixture.reservationsId.Count, returnValue.Count); // Adjust the expected count as needed
         }
         [Fact]
         public async Task PostReservation_ReturnsBadRequest_WhenReservationDatesAreNotValid()
@@ -163,7 +151,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222225"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 16, 15, 15, 0),
                 To = new DateTime(2027, 1, 18, 15, 15, 0),
                 RoomNumber = 100
@@ -183,7 +171,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -203,7 +191,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = _databaseFixture.adminId,
                 From = DateTime.Now.AddDays(1),
                 RoomNumber = 102
             }; ;
@@ -221,7 +209,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 16, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -241,7 +229,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 19, 15, 0, 0),
                 RoomNumber = 100
@@ -281,7 +269,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                CustomerId = _databaseFixture.consumerId,
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 102
@@ -304,7 +292,7 @@ namespace DevHotelAppTest.IntegrationTests
             var reservationDto = new ReservationDto
             {
                 Id = Guid.NewGuid(),
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = _databaseFixture.consumerId,
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 101
@@ -321,11 +309,11 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task PutReservation_ReturnsBadRequest_WhenReservationOverlapsBothEnds()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = _databaseFixture.reservationsId.Last();
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222223"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 16, 15, 0, 0),
                 To = new DateTime(2027, 1, 18, 15, 0, 0),
                 RoomNumber = 100
@@ -343,11 +331,11 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task PutReservation_ReturnsBadRequest_WhenReservationOverlapsEnd()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = _databaseFixture.reservationsId.Last();
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222224"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 17, 15, 0, 0),
                 To = new DateTime(2027, 1, 19, 15, 0, 0),
                 RoomNumber = 100
@@ -364,12 +352,12 @@ namespace DevHotelAppTest.IntegrationTests
         [Fact]
         public async Task PutReservation_ReturnsBadRequest_WhenReservationOverlapsStart()
         {
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = _databaseFixture.reservationsId.Last();
             // Arrange
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 15, 15, 0, 0),
                 To = new DateTime(2027, 1, 17, 15, 0, 0),
                 RoomNumber = 100
@@ -387,11 +375,11 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task PutReservation_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var validId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var validId = _databaseFixture.reservationsId.Last();
             var reservationDto = new ReservationDto
             {
                 Id = validId,
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                CustomerId = _databaseFixture.consumerId,
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now.AddDays(3),
                 RoomNumber = 101

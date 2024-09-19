@@ -53,7 +53,7 @@ namespace DevHotelAPI.Services.Repositories
 
         public async Task UpdateRoomAsync(Room room)
         {
-            _context.Rooms.Update(room);
+            _context.Entry(room).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
     }

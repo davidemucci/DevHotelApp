@@ -11,37 +11,23 @@ using DevHotelAPI.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace DevHotelAppTest.IntegrationTests
 {
     public class CustomersControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly HotelDevContext _context;
         private readonly CustomerController _controller;
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IdentityContext _identityContext;
-        private readonly IMapper _mapper;
-        private readonly ICustomerRepository _repository;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
-        private readonly IValidator<Customer> _validator;
-        private readonly ILogger _logger;
-        private readonly IHandleExceptionService _handleExceptionService;
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {
-            databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
-            _identityContext = databaseFixture._identityContext;
-            _userManager = databaseFixture._userManager;
-            _context = databaseFixture._context;
-            _logger = databaseFixture._logger;
-            _mapper = databaseFixture.GetMapper();
-            _repository = new CustomerRepository(_context, _userManager);
-            _validator = new CustomerValidator();
-            _handleExceptionService = _databaseFixture._handleExceptionService;
-            _controller = new CustomerController(_handleExceptionService, _logger, _mapper, _repository, _validator);
-            
+            _databaseFixture.ResetContext();
+            _controller = new CustomerController(_databaseFixture._handleExceptionService, databaseFixture._logger, _databaseFixture.GetMapper(),
+                new CustomerRepository(databaseFixture._context, databaseFixture._userManager),
+                new CustomerValidator());
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
 
@@ -49,7 +35,8 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task DeleteCustomer_ReturnsNoContent_WhenCustomerIsDeleted()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var customerId = _databaseFixture.consumerId;
+            //var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
             // Act
             var result = await _controller.DeleteCustomer(customerId);
@@ -59,14 +46,14 @@ namespace DevHotelAppTest.IntegrationTests
         }
 
         [Fact]
-        public async Task DeleteCustomer_ReturnsNoContentAndNotDeleteCustomer_WhenCustomerToDeleteIsAnotherUserANDIsNotAdmin()
+        public async Task DeleteCustomer_ReturnsBadRequest_WhenCustomerToDeleteIsAnotherUserANDIsNotAdmin()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222221");
+            var adminId = _databaseFixture.adminId;
 
             // Act
-            var result = await _controller.DeleteCustomer(customerId);
-            var isNotDeleted = await _repository.CustomerExistsAsync(customerId);
+            var result = await _controller.DeleteCustomer(adminId);
+            var isNotDeleted = await _databaseFixture._context.Customers.AnyAsync(c => c.Id.Equals(adminId));
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
@@ -77,7 +64,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task GetCustomer_ReturnsCustomer_WhenCustomerExists()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var customerId = _databaseFixture.consumerId;
 
             // Act
             var result = await _controller.GetCustomer(customerId);
@@ -139,7 +126,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task PutCustomer_ReturnsNoContent_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var customerId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var customerId = _databaseFixture.consumerId;
             var customerDto = new CustomerDto
             {
                 Id = customerId,

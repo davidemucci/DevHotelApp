@@ -16,31 +16,22 @@ namespace DevHotelAppTest.IntegrationTests
     [Collection("DatabaseCollection")]
     public class RoomTypesControllerTests : IClassFixture<DatabaseFixture>
     {
-        private readonly HotelDevContext _context;
+
         private readonly RoomTypesController _controller;
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IMapper _mapper;
-        private readonly IRoomTypeRepository _repository;
-        private readonly IValidator<RoomType> _validator;
-        private readonly ILogger _logger;
 
         public RoomTypesControllerTests(DatabaseFixture databaseFixture)
         {
-            _databaseFixture = databaseFixture;
             databaseFixture.ResetContext();
-            _context = databaseFixture._context;
-            _mapper = databaseFixture.GetMapper();
-            _logger = databaseFixture._logger;
-            _repository = new RoomTypeRepository(_context);
-            _validator = new RoomTypeValidator();
-            _controller = new RoomTypesController(_mapper, _repository, _validator, _logger);
+            _databaseFixture = databaseFixture;
+            _controller = new RoomTypesController(_databaseFixture.GetMapper(), new RoomTypeRepository(_databaseFixture._context), new RoomTypeValidator(), _databaseFixture._logger);
         }
 
         [Fact]
         public async Task DeleteRoom_ReturnNoContent()
         {
             //Arrange
-            int roomId = 1;
+            int roomId = _databaseFixture.roomTypesId.First();
             //Act
             var result = await _controller.DeleteRoomType(roomId);
             //Assert
@@ -60,8 +51,10 @@ namespace DevHotelAppTest.IntegrationTests
         [Fact]
         public async Task GetRoomTypeById_ReturnsOk()
         {
+            var roomId = _databaseFixture.roomTypesId.First();
+
             //Act
-            var result = await _controller.GetRoomType(1);
+            var result = await _controller.GetRoomType(roomId);
 
             //Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -77,7 +70,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<RoomType>>(okResult.Value);
-            Assert.Equal(4, returnValue.Count);
+            Assert.Equal(_databaseFixture.roomTypesId.Count(), returnValue.Count);
         }
         [Fact]
         public async Task PostRoomType_ReturnsCreatedAtAction()
@@ -118,9 +111,10 @@ namespace DevHotelAppTest.IntegrationTests
         [Fact]
         public async Task PutRoomType_ReturnsBadRequest_WhenDtoIsNotValid()
         {
+            
             var roomType = new RoomTypeDto
             {
-                Id = 4,
+                Id = _databaseFixture.roomTypesId.First(),
                 TotalNumber = 100
             };
             var result = await _controller.PutRoomType((int)roomType.Id, roomType);
@@ -152,7 +146,7 @@ namespace DevHotelAppTest.IntegrationTests
         {
             var roomType = new RoomTypeDto
             {
-                Id = 4,
+                Id = _databaseFixture.roomTypesId.First(),
                 Description = "New King Room",
                 TotalNumber = 100
             };
@@ -182,7 +176,7 @@ namespace DevHotelAppTest.IntegrationTests
             var roomType = new RoomTypeDto { Id = 0, Description = "Descrizione", TotalNumber = 111 };
 
             // Act
-            var result = await _controller.PutRoomType(0, _mapper.Map<RoomTypeDto>(roomType));
+            var result = await _controller.PutRoomType(0, roomType);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

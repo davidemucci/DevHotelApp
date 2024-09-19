@@ -17,8 +17,8 @@ namespace DevHotelAppTest.UnitTests
 
         public RoomRepositoryTests(DatabaseFixture databaseFixture)
         {
-            _context = databaseFixture._context;
             databaseFixture.ResetContext();
+            _context = databaseFixture._context;
             _repository = new RoomRepository(_context); 
         }
 
@@ -65,9 +65,10 @@ namespace DevHotelAppTest.UnitTests
         [Fact]
         public async Task GetAllRoomAsync_ShouldReturnAllRooms()
         {
+            var number = 200;
             // Arrange
             var rooms = new Faker<Room>()
-                .RuleFor(r => r.Number, f => f.Random.Int(200, 300))
+                .RuleFor(r => r.Number, f => number++)
                 .RuleFor(r => r.Description, f => f.Lorem.Sentence())
                 .RuleFor(r => r.RoomTypeId, f => f.Random.Int(1, 5))
                 .Generate(5);
@@ -135,8 +136,10 @@ namespace DevHotelAppTest.UnitTests
             var toDate = new DateTime(2029, 9, 10);
             var capacity = 2;
 
+            var id = 400;
+
             var rooms = new Faker<Room>()
-                .RuleFor(r => r.Number, f => f.Random.Int(400, 500))
+                .RuleFor(r => r.Number, f => id++)
                 .RuleFor(r => r.Description, f => f.Lorem.Sentence())
                 .RuleFor(r => r.RoomTypeId, f => f.Random.Int(2, 5))
                 .Generate(5);
@@ -146,9 +149,9 @@ namespace DevHotelAppTest.UnitTests
                 .RuleFor(r => r.From, f => new DateTime(2029, 9, 5))
                 .RuleFor(r => r.To, f => new DateTime(2029, 9, 7))
                 .Generate(1);
-
+            var start = 2;
             var roomTypes = new Faker<RoomType>()
-                .RuleFor(rt => rt.Capacity, f => f.Random.Int(2, 4))
+                .RuleFor(rt => rt.Capacity, f => start++)
                 .RuleFor(rt => rt.Description, f => f.Lorem.Sentence())
                 .Generate(2);
 

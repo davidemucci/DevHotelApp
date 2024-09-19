@@ -48,7 +48,7 @@ namespace DevHotelAppTest.UnitTests
         {
             // Arrange
             var roomType = new Faker<RoomType>()
-                .RuleFor(r => r.Id, f => f.Random.Int(1, 1000))
+                .RuleFor(r => r.Id, 800)
                 .RuleFor(r => r.Capacity, f => f.Random.Int(1, 5))
                 .RuleFor(r => r.Description, f => f.Lorem.Sentence())
                 .RuleFor(r => r.TotalNumber, f => f.Random.Int(1, 100))
@@ -68,9 +68,10 @@ namespace DevHotelAppTest.UnitTests
         [Fact]
         public async Task GetAllRoomTypesAsync_ShouldReturnAllRoomTypes()
         {
+            var id = 600;
             // Arrange
             var roomTypes = new Faker<RoomType>()
-                .RuleFor(r => r.Id, f => f.Random.Int(1, 1000))
+                .RuleFor(r => r.Id, f => id++)
                 .RuleFor(r => r.Capacity, f => f.Random.Int(1, 5))
                 .RuleFor(r => r.Description, f => f.Lorem.Sentence())
                 .RuleFor(r => r.TotalNumber, f => f.Random.Int(1, 100))

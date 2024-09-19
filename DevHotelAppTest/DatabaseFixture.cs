@@ -21,7 +21,7 @@ namespace DevHotelAppTest
 {
     public class DatabaseFixture : IAsyncLifetime
     {
-        private IBogusRepository _bogusRepo;
+        private BogusRepository _bogusRepo;
         private UserManager<IdentityUser<Guid>> _userManger;
         public HotelDevContext _context { get; private set; }
         public IdentityContext _identityContext { get; private set; }
@@ -30,9 +30,25 @@ namespace DevHotelAppTest
         public IHandleExceptionService _handleExceptionService { get; private set; }
 
 
+        public string userNameAdmin;
+        public string userNameConsumer;
+        public Guid consumerId;
+        public Guid adminId;
+        public Guid consumerIdentityId;
+        public Guid adminIdenityId;
+        public List<Guid> reservationsId;
+        public List<int> roomsId;
+        public List<int> roomTypesId;
+        public List<string> roles;
+        public List<string> descRoomTypes;
+
+        public int reservationCount;
+        public int customersCount;
+        public int roomCount;
+        public int totalRooms;
+
         public DatabaseFixture()
         {
-
         }
 
         public void DetachAllEntities()
@@ -52,8 +68,11 @@ namespace DevHotelAppTest
 
         public async Task DisposeAsync()
         {
+            _identityContext.Database.EnsureDeleted();
             _context.Database.EnsureDeleted();
+
             await _context.DisposeAsync();
+            await _identityContext.DisposeAsync();
         }
 
         public IMapper GetMapper()
@@ -66,11 +85,6 @@ namespace DevHotelAppTest
         }
 
         public async Task InitializeAsync()
-        {
-            ResetContext();
-        }
-
-        public void ResetContext()
         {
             var options = new DbContextOptionsBuilder<HotelDevContext>()
                 .UseInMemoryDatabase(databaseName: "TestHotelDevDb-" + Guid.NewGuid())
@@ -97,12 +111,35 @@ namespace DevHotelAppTest
             _logger = new LoggerConfiguration()
                     .WriteTo.Console()
                     .CreateLogger();
-
-            
             _handleExceptionService = new HandleExceptionService(_logger);
+
+            ResetContext();
+        }
+
+        public void ResetContext()
+        {
+
+
+            _identityContext.Database.EnsureDeleted();
+            _context.Database.EnsureDeleted();
+
             _identityContext.Database.EnsureCreated();
             _context.Database.EnsureCreated();
 
+            userNameAdmin = _bogusRepo.UserNameAdmin;
+            userNameConsumer = _bogusRepo.UserNameConsumer;
+            consumerId = _bogusRepo.ConsumerId;
+            adminId = _bogusRepo.AdminId;
+            consumerIdentityId = _bogusRepo.ConsumerIdentityId;
+            adminIdenityId = _bogusRepo.AdminIdenityId;
+            reservationsId = _bogusRepo.ReservationsId;
+            roomsId = _bogusRepo.RoomsId;
+            roomTypesId = _bogusRepo.RoomTypesId;
+            roles = _bogusRepo.Roles;
+            roomCount = _bogusRepo.RoomCount;
+            totalRooms = _bogusRepo.TotalRooms;
+
+            DetachAllEntities();
         }
 
         public void SetHttpContextAsAdminUser(ControllerBase controller)

@@ -23,11 +23,11 @@ namespace DevHotelAPI.Controllers
     [ApiController]
     public class CustomerController(IHandleExceptionService handleExceptionService, ILogger logger, IMapper mapper, ICustomerRepository repository, IValidator<Customer> validator) : ControllerBase
     {
+        private readonly IHandleExceptionService _handleExceptionService = handleExceptionService;
+        private readonly ILogger _logger = logger;
         private readonly IMapper _mapper = mapper;
         private readonly ICustomerRepository _repository = repository;
         private readonly IValidator<Customer> _validator = validator;
-        private readonly ILogger _logger = logger;
-        private readonly IHandleExceptionService _handleExceptionService = handleExceptionService;
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(Guid id)

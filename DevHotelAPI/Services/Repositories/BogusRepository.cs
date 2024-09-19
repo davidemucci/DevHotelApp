@@ -9,7 +9,26 @@ namespace DevHotelAPI.Services
 {
     public class BogusRepository : IBogusRepository
     {
-        private int totalRooms { get; set; }
+        public Guid AdminId { get; private set; } = Guid.Parse("22222222-2222-2222-2222-222222222221");
+        public Guid AdminIdenityId { get; private set; } = Guid.Parse("99999999-9999-9999-9999-999999999991");
+        public Guid ConsumerId { get; private set; } = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        public Guid ConsumerIdentityId { get; private set; } = Guid.Parse("99999999-9999-9999-9999-999999999992");
+        public List<Guid> ReservationsId { get; private set; } = [ 
+            Guid.Parse("11111111-1111-1111-1111-111111111111"), 
+            Guid.Parse("11111111-1111-1111-1111-111111111112"), 
+            Guid.Parse("11111111-1111-1111-1111-111111111113"), 
+            Guid.Parse("11111111-1111-1111-1111-111111111114"), 
+            Guid.Parse("11111111-1111-1111-1111-111111111115") ];
+        public List<int> RoomsId { get; private set; } = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109];
+        public List<int> RoomTypesId { get; private set; } = [1, 2, 3, 4];
+        public string UserNameAdmin { get; private set; } = "ADMIN";
+        public string UserNameConsumer { get; private set; } = "CONSUMER";
+        public int CustomersCount { get; private set; } = 2;
+        public List<string> DescriptionsRoomTypes { get; private set; } = ["Room", "TwinRoom", "Triple", "Suite"];
+        public int ReservationCount = 5;
+        public List<string> Roles { get; private set; } = ["Administrator", "Consumer"];
+        public int RoomCount { get; private set; } = 0;
+        public int TotalRooms { get; set; }
 
         public List<IdentityUserRole<Guid>> AssignRolesToFakeUsers(List<IdentityRole<Guid>> roles, List<IdentityUser<Guid>> users)
         {
@@ -39,7 +58,7 @@ namespace DevHotelAPI.Services
                 .RuleFor(r => r.Address, f => f.Address.StreetAddress()
                 );
 
-            var customersFaker = Enumerable.Range(1, 2)
+            var customersFaker = Enumerable.Range(1, CustomersCount)
                 .Select(i => SeedRow(customer, i))
                 .ToList();
 
@@ -59,9 +78,11 @@ namespace DevHotelAPI.Services
                 .RuleFor(r => r.To, f => new DateTime(2027, 1, 18, 15, 15, 0))
                 ;
 
-            var reservationsFaker = Enumerable.Range(1, 5)
+            var reservationsFaker = Enumerable.Range(1, ReservationCount)
                 .Select(i => SeedRow(reservations, i))
                 .ToList();
+
+            ReservationsId = reservationsFaker.Select(i => i.Id).ToList();
             return reservationsFaker;
         }
 
@@ -69,7 +90,7 @@ namespace DevHotelAPI.Services
         {
             var id = 1;
             var count = 0;
-            var rolesNames = new List<string>() { "Administrator", "Consumer" };
+            var rolesNames = Roles;
 
             var roleFaker = new Faker<IdentityRole<Guid>>()
             .RuleFor(u => u.Id, f => Guid.Parse("19999999-9999-9999-9999-99999999999" + id++.ToString()))
@@ -86,16 +107,17 @@ namespace DevHotelAPI.Services
         public List<Room> GenerateRooms(int roomTypesTotalNumber = 4, int totalRoomsBumber = 10)
         {
             var roomNumber = 100;
-            totalRooms = totalRoomsBumber;
+            TotalRooms = totalRoomsBumber;
 
 
             var room = new Faker<Room>()
                   .RuleFor(r => r.Number, f => roomNumber++)
                   .RuleFor(r => r.RoomTypeId, f => f.Random.Int(1, roomTypesTotalNumber));
 
-            List<Room> roomsFaker = Enumerable.Range(1, totalRooms)
+            List<Room> roomsFaker = Enumerable.Range(1, TotalRooms)
                 .Select(i => SeedRow(room, i))
                 .ToList();
+
             return roomsFaker;
         }
 
@@ -103,21 +125,22 @@ namespace DevHotelAPI.Services
         {
             var id = 1;
             var count = 0;
-            var descRoomTypes = new List<string>() { "Room", "TwinRoom", "Triple", "Suite" };
             var capacity = 1;
 
             var SeededOrder = new Random(12345);
 
-            var roomTypes = new Faker<RoomType>()
+            var roomTypesFaker = new Faker<RoomType>()
                 .RuleFor(r => r.Id, f => id++)
                 .RuleFor(r => r.Capacity, f => capacity++)
-                .RuleFor(r => r.Description, f => descRoomTypes[count++])
+                .RuleFor(r => r.Description, f => DescriptionsRoomTypes[count++])
                 .RuleFor(r => r.TotalNumber, f => f.Random.Int(1, 50));
 
-
-            return Enumerable.Range(1, descRoomTypes.Count)
-                .Select(i => SeedRow(roomTypes, i))
+            var roomTypes = Enumerable.Range(1, DescriptionsRoomTypes.Count)
+                .Select(i => SeedRow(roomTypesFaker, i))
                 .ToList();
+
+            RoomTypesId = roomTypes.Select(r => r.Id).ToList();
+            return roomTypes;
         }
 
         public List<IdentityUser<Guid>> GenerateUsers()
@@ -137,7 +160,7 @@ namespace DevHotelAPI.Services
             .RuleFor(u => u.NormalizedEmail, f => email[emailCounter++].ToUpper())
             .RuleFor(u => u.PhoneNumber, f => f.Phone.PhoneNumber());
 
-            var usersFaker = Enumerable.Range(1, 2)
+            var usersFaker = Enumerable.Range(1, CustomersCount)
                 .Select(i => SeedRow(userFaker, i))
                 .ToList();
 
