@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
+using DevHotelAPI.Services.Utility;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +15,13 @@ namespace DevHotelAPI.Controllers
     [Route("api/reservations")]
     [Authorize(Roles = "Administrator,Consumer")]
     [ApiController]
-    public class ReservationsController(HandleExceptionService handleExceptionService, IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, ILogger logger) : ControllerBase
+    public class ReservationsController(IHandleExceptionService handleExceptionService, IMapper mapper, IReservationRepository repository, IValidator<Reservation> validator, ILogger logger) : ControllerBase
     {
         private readonly IMapper _mapper = mapper;
         private readonly IReservationRepository _repository = repository;
         private readonly IValidator<Reservation> _validator = validator;
         private readonly ILogger _logger = logger;
-        private readonly HandleExceptionService _handleExceptionService = handleExceptionService;
+        private readonly IHandleExceptionService _handleExceptionService = handleExceptionService;
 
 
         [HttpDelete("{id}")]

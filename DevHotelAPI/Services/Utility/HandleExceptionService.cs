@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DevHotelAPI.Services.Contracts;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ILogger = Serilog.ILogger;
-namespace DevHotelAPI.Services
+
+namespace DevHotelAPI.Services.Utility
 {
-    public class HandleExceptionService : ControllerBase
+    public class HandleExceptionService : ControllerBase, IHandleExceptionService
     {
         private readonly ILogger _logger;
-        public HandleExceptionService(ILogger logger) 
+        public HandleExceptionService(ILogger logger)
         {
             _logger = logger;
         }

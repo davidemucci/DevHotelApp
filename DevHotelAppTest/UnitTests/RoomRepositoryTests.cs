@@ -131,8 +131,8 @@ namespace DevHotelAppTest.UnitTests
         public async Task GetAllRoomsAvailableAsync_ShouldReturnAvailableRooms()
         {
             // Arrange
-            var fromDate = new DateTime(2024, 9, 1);
-            var toDate = new DateTime(2024, 9, 10);
+            var fromDate = new DateTime(2029, 9, 1);
+            var toDate = new DateTime(2029, 9, 10);
             var capacity = 2;
 
             var rooms = new Faker<Room>()
@@ -143,8 +143,8 @@ namespace DevHotelAppTest.UnitTests
 
             var reservations = new Faker<Reservation>()
                 .RuleFor(r => r.RoomNumber, f => rooms.Last().Number)
-                .RuleFor(r => r.From, f => new DateTime(2024, 9, 5))
-                .RuleFor(r => r.To, f => new DateTime(2024, 9, 7))
+                .RuleFor(r => r.From, f => new DateTime(2029, 9, 5))
+                .RuleFor(r => r.To, f => new DateTime(2029, 9, 7))
                 .Generate(1);
 
             var roomTypes = new Faker<RoomType>()

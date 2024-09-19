@@ -4,6 +4,7 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
+using DevHotelAPI.Services.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -26,7 +27,7 @@ namespace DevHotelAppTest
         public IdentityContext _identityContext { get; private set; }
         public UserManager<IdentityUser<Guid>> _userManager;
         public ILogger _logger { get; private set; }
-        public HandleExceptionService _handleExceptionService { get; private set; }
+        public IHandleExceptionService _handleExceptionService { get; private set; }
 
 
         public DatabaseFixture()

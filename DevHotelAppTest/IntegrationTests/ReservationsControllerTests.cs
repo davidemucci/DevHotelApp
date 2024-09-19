@@ -4,9 +4,9 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Services.Utility;
 using DevHotelAPI.Validators;
 using FluentValidation;
 using FluentValidation.Results;
@@ -31,7 +31,7 @@ namespace DevHotelAppTest.IntegrationTests
         private readonly IReservationRepository _repository;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Reservation> _validator;
-        private readonly HandleExceptionService _handlerExceptionService;
+        private readonly IHandleExceptionService _handlerExceptionService;
         public ReservationsControllerTests(DatabaseFixture databaseFixture)
         {
             _databaseFixture = databaseFixture;

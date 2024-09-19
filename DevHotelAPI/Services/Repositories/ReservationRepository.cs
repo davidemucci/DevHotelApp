@@ -2,6 +2,7 @@
 using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
+using DevHotelAPI.Services.Utility;
 using Humanizer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,17 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace DevHotelAPI.Services.Repositories
 {
 
-    public class ReservationRepository : IReservationRepository
+    public class ReservationRepository(HotelDevContext context, IdentityContext identityContext, UserManager<IdentityUser<Guid>> userManager) : IReservationRepository
     {
-        private readonly HotelDevContext _context;
-        private readonly IdentityContext _identityContext;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
-        public ReservationRepository(HotelDevContext context, IdentityContext identityContext, UserManager<IdentityUser<Guid>> userManager)
-        {
-            _context = context;
-            _identityContext = identityContext;
-            _userManager = userManager;
-        }
+        private readonly HotelDevContext _context = context;
+        private readonly IdentityContext _identityContext = identityContext;
+        private readonly UserManager<IdentityUser<Guid>> _userManager = userManager;
 
         public async Task AddReservationAsync(Reservation reservation, string userName)
         {

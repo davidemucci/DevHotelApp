@@ -1,21 +1,17 @@
 ﻿using DevHotelAPI.Contexts;
 using DevHotelAPI.Entities;
 using DevHotelAPI.Services.Contracts;
+using DevHotelAPI.Services.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 
 namespace DevHotelAPI.Services.Repositories
 {
-    public class CustomerRepository : ICustomerRepository
+    public class CustomerRepository(HotelDevContext context, UserManager<IdentityUser<Guid>> userManager) : ICustomerRepository
     {
-        private readonly HotelDevContext _context;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
-        public CustomerRepository(HotelDevContext context, UserManager<IdentityUser<Guid>> userManager)
-        {
-            _context = context;
-            _userManager = userManager;
-        }
+        private readonly HotelDevContext _context = context;
+        private readonly UserManager<IdentityUser<Guid>> _userManager = userManager;
 
         public async Task AddCustomerAsync(Customer client)
         {

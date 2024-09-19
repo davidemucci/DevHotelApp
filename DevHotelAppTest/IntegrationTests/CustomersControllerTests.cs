@@ -4,9 +4,9 @@ using DevHotelAPI.Contexts.Identity;
 using DevHotelAPI.Controllers;
 using DevHotelAPI.Dtos;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Repositories;
+using DevHotelAPI.Services.Utility;
 using DevHotelAPI.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +26,7 @@ namespace DevHotelAppTest.IntegrationTests
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly IValidator<Customer> _validator;
         private readonly ILogger _logger;
-        private readonly HandleExceptionService _handleExceptionService;
+        private readonly IHandleExceptionService _handleExceptionService;
 
         public CustomersControllerTests(DatabaseFixture databaseFixture)
         {

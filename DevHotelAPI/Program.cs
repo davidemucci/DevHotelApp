@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using DevHotelAPI.Services.Utility;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
@@ -28,9 +29,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
 try
 {
-
-
-
     var builder = WebApplication.CreateBuilder(args);
 
     // Add services to the container.
@@ -44,8 +42,7 @@ try
         .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         );
-
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(opt =>
     {
@@ -83,7 +80,6 @@ try
         builder.Configuration.GetConnectionString("IdentityHotelDevConnectionString")).LogTo(Console.WriteLine, LogLevel.Information)
     );
 
-
     builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
         .AddEntityFrameworkStores<IdentityContext>()
         .AddDefaultTokenProviders();
@@ -120,7 +116,7 @@ try
     builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
     builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
     builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-    builder.Services.AddScoped<HandleExceptionService>();
+    builder.Services.AddScoped<IHandleExceptionService, HandleExceptionService>();
 
 
     builder.Services.AddAutoMapper(typeof(MainMapperProfile));
@@ -128,9 +124,12 @@ try
     builder.Services.AddScoped<IValidator<Room>, RoomValidator>();
     builder.Services.AddScoped<IValidator<Customer>, CustomerValidator>();
     builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
-    var app = builder.Build();
 
+
+
+    var app = builder.Build();
     // Configure the HTTP request pipeline.
+
     app.UseSerilogRequestLogging();
     if (app.Environment.IsDevelopment())
     {
