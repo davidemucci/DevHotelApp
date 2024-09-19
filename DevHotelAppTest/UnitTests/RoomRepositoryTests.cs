@@ -138,7 +138,7 @@ namespace DevHotelAppTest.UnitTests
             var rooms = new Faker<Room>()
                 .RuleFor(r => r.Number, f => f.Random.Int(400, 500))
                 .RuleFor(r => r.Description, f => f.Lorem.Sentence())
-                .RuleFor(r => r.RoomTypeId, f => f.Random.Int(1, 5))
+                .RuleFor(r => r.RoomTypeId, f => f.Random.Int(2, 5))
                 .Generate(5);
 
             var reservations = new Faker<Reservation>()
@@ -160,9 +160,9 @@ namespace DevHotelAppTest.UnitTests
             await _context.SaveChangesAsync();
 
             // Act
+            var roomsType = _context.RoomTypes.ToList();
             var result = await _repository.GetAllRoomsAvailableAsync(fromDate, toDate, capacity);
-
-            var res = result.Contains(rooms[0]);
+            var all = await _repository.GetAllRoomAsync();
             // Assert
             Assert.NotEmpty(result);
             Assert.Equal(4 + count.Count(), result.Count());
