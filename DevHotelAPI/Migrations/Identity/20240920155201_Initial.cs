@@ -172,8 +172,8 @@ namespace DevHotelAPI.Migrations.Identity
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("99999999-9999-9999-9999-999999999991"), 0, "d2e639d5-514a-4944-bed4-29a124f35dba", "admin@email.com", false, false, null, "ADMIN@EMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEKkKBqySb16D295abICCOmk+M/GcOle+TZwpOQtlMSrn0GCRm/rmZniUSbgEUkBHjg==", "276-543-9160", false, null, false, "admin" },
-                    { new Guid("99999999-9999-9999-9999-999999999992"), 0, "c56a9c09-9556-44ee-9723-df9a8c6ec3df", "consumer@email.com", false, false, null, "CONSUMER@EMAIL.COM", "CONSUMER", "AQAAAAIAAYagAAAAECbqQedmc2VmQlq751RD/6vOWwGqd1elQpBA42tzkis8wSKQ8Q174EeXKTc3n0VDKg==", "591.338.4207 x0053", false, null, false, "consumer" }
+                    { new Guid("99999999-9999-9999-9999-999999999991"), 0, "6821d287-343e-4a7e-bdbb-a7e19bd1a615", "admin@email.com", false, false, null, "ADMIN@EMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEE5NF1pvwKy5h3x2/PLZl12Nw18EhIFC541JbSZL92Xu6RujtGIueYcqCbvHSnt6ag==", "276-543-9160", false, null, false, "admin" },
+                    { new Guid("99999999-9999-9999-9999-999999999992"), 0, "038befbb-10eb-4099-8f3c-82f5866a752e", "consumer@email.com", false, false, null, "CONSUMER@EMAIL.COM", "CONSUMER", "AQAAAAIAAYagAAAAEJX6+HDbHZftCnnjrdAee45Q/oa51XEo1NctYwkvdXLtE4j0zkjo38Fjf0OJVlvNCg==", "591.338.4207 x0053", false, null, false, "consumer" }
                 });
 
             migrationBuilder.InsertData(
