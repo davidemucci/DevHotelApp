@@ -26,7 +26,7 @@ namespace DevHotelAppTest.IntegrationTests
         {
             databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
-            _controller = new RoomsController(_databaseFixture.GetMapper(), new RoomRepository(_databaseFixture._context), new RoomValidator(), _databaseFixture._logger);
+            _controller = new RoomsController(DatabaseFixture.GetMapper(), new RoomRepository(_databaseFixture.Context), new RoomValidator(), _databaseFixture.Logger);
         }
 
         [Fact]

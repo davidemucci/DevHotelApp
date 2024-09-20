@@ -25,8 +25,8 @@ namespace DevHotelAppTest.IntegrationTests
         {
             _databaseFixture = databaseFixture;
             _databaseFixture.ResetContext();
-            _controller = new CustomerController(_databaseFixture._handleExceptionService, databaseFixture._logger, _databaseFixture.GetMapper(),
-                new CustomerRepository(databaseFixture._context, databaseFixture._userManager),
+            _controller = new CustomerController(_databaseFixture.HandleExceptionService, databaseFixture.Logger, DatabaseFixture.GetMapper(),
+                new CustomerRepository(databaseFixture.Context, databaseFixture._userManager),
                 new CustomerValidator());
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
@@ -53,7 +53,7 @@ namespace DevHotelAppTest.IntegrationTests
 
             // Act
             var result = await _controller.DeleteCustomer(adminId);
-            var isNotDeleted = await _databaseFixture._context.Customers.AnyAsync(c => c.Id.Equals(adminId));
+            var isNotDeleted = await _databaseFixture.Context.Customers.AnyAsync(c => c.Id.Equals(adminId));
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

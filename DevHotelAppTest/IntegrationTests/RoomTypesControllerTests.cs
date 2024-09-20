@@ -24,7 +24,7 @@ namespace DevHotelAppTest.IntegrationTests
         {
             databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
-            _controller = new RoomTypesController(_databaseFixture.GetMapper(), new RoomTypeRepository(_databaseFixture._context), new RoomTypeValidator(), _databaseFixture._logger);
+            _controller = new RoomTypesController(DatabaseFixture.GetMapper(), new RoomTypeRepository(_databaseFixture.Context), new RoomTypeValidator(), _databaseFixture.Logger);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<RoomType>>(okResult.Value);
-            Assert.Equal(_databaseFixture.roomTypesId.Count(), returnValue.Count);
+            Assert.Equal(_databaseFixture.roomTypesId.Count, returnValue.Count);
         }
         [Fact]
         public async Task PostRoomType_ReturnsCreatedAtAction()

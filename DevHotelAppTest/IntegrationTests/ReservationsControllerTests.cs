@@ -29,9 +29,9 @@ namespace DevHotelAppTest.IntegrationTests
         {
             databaseFixture.ResetContext();
             _databaseFixture = databaseFixture;
-            _controller = new ReservationsController(_databaseFixture._handleExceptionService, _databaseFixture.GetMapper(),
-                new ReservationRepository(_databaseFixture._context, _databaseFixture._identityContext, _databaseFixture._userManager),
-                new ReservationValidator(), _databaseFixture._logger);
+            _controller = new ReservationsController(_databaseFixture.HandleExceptionService, DatabaseFixture.GetMapper(),
+                new ReservationRepository(_databaseFixture.Context, _databaseFixture.IdentityContext, _databaseFixture._userManager),
+                new ReservationValidator(), _databaseFixture.Logger);
             _databaseFixture.SetHttpContextAsConsumerUser(_controller);
         }
 
@@ -78,7 +78,7 @@ namespace DevHotelAppTest.IntegrationTests
         public async Task GetReservation_ReturnsReservation_WhenIdIsValid()
         {
             // Arrange
-            var validId = _databaseFixture._context.Reservations.Where(c => c.CustomerId.Equals(_databaseFixture.consumerId)).Select(c => c.Id).First();
+            var validId = _databaseFixture.Context.Reservations.Where(c => c.CustomerId.Equals(_databaseFixture.consumerId)).Select(c => c.Id).First();
 
             // Act
             var result = await _controller.GetReservation(validId);
@@ -95,10 +95,10 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var customerId = _databaseFixture.consumerId;
 
-            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, "CONSUMER")
-                }, "mock"));
+            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(
+                [
+                    new (ClaimTypes.Name, "CONSUMER")
+                ], "mock"));
 
             _controller.ControllerContext = new ControllerContext
             {

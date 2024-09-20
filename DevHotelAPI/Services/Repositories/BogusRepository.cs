@@ -5,7 +5,7 @@ using DevHotelAPI.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 
-namespace DevHotelAPI.Services
+namespace DevHotelAPI.Services.Repositories
 {
     public class BogusRepository : IBogusRepository
     {
@@ -16,14 +16,14 @@ namespace DevHotelAPI.Services
         public int CustomersCount { get; private set; } = 2;
         public List<string> DescriptionsRoomTypes { get; private set; } = ["Room", "TwinRoom", "Triple", "Suite"];
         /// Only Last Reservation has CostumerId as AdminId, others ConsumerId
-        public List<Guid> ReservationsId { get; private set; } = [ 
-            Guid.Parse("11111111-1111-1111-1111-111111111111"), 
-            Guid.Parse("11111111-1111-1111-1111-111111111112"), 
-            Guid.Parse("11111111-1111-1111-1111-111111111113"), 
-            Guid.Parse("11111111-1111-1111-1111-111111111114"), 
+        public List<Guid> ReservationsId { get; private set; } = [
+            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            Guid.Parse("11111111-1111-1111-1111-111111111112"),
+            Guid.Parse("11111111-1111-1111-1111-111111111113"),
+            Guid.Parse("11111111-1111-1111-1111-111111111114"),
             Guid.Parse("11111111-1111-1111-1111-111111111115") ];
 
-        public Dictionary<string, Guid> Roles = new Dictionary<string, Guid>() 
+        public Dictionary<string, Guid> Roles = new()
         {
             { "Administrator" , Guid.Parse("19999999-9999-9999-9999-999999999991") },
             { "Consumer" , Guid.Parse("19999999-9999-9999-9999-999999999992") },
@@ -37,7 +37,7 @@ namespace DevHotelAPI.Services
         {
             var id = 0;
             var userRoleFaker = new Faker<IdentityUserRole<Guid>>()
-                .RuleFor(r => r.RoleId, f => id == 0 ?  Roles["Administrator"] : Roles["Consumer"])
+                .RuleFor(r => r.RoleId, f => id == 0 ? Roles["Administrator"] : Roles["Consumer"])
                 .RuleFor(r => r.UserId, f =>
                 {
                     var userId = id == 0 ? AdminIdenityId : ConsumerIdentityId;
@@ -89,7 +89,7 @@ namespace DevHotelAPI.Services
                 {
                     var number = RoomsId[id];
                     id++;
-                    return number;  
+                    return number;
                 })
                 .RuleFor(r => r.CustomerId, ConsumerId)
                 .RuleFor(r => r.From, f => new DateTime(2027, 1, 16, 15, 15, 0))
@@ -113,10 +113,11 @@ namespace DevHotelAPI.Services
             var roleFaker = new Faker<IdentityRole<Guid>>()
             .RuleFor(u => u.Id, f => id == 0 ? Roles["Administrator"] : Roles["Consumer"])
             .RuleFor(u => u.Name, f => id == 0 ? "Administrator" : "Consumer")
-            .RuleFor(u => u.NormalizedName, f => {
+            .RuleFor(u => u.NormalizedName, f =>
+            {
                 var name = id == 0 ? "Administrator" : "Consumer";
                 id++;
-                return name; 
+                return name;
             });
 
             var rolesFaker = Enumerable.Range(1, Roles.Count)

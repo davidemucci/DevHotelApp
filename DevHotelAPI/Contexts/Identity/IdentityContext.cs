@@ -5,16 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevHotelAPI.Contexts.Identity
 {
-    public class IdentityContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>
+    public class IdentityContext(DbContextOptions<IdentityContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>(options)
     {
-        private IBogusRepository _bogusRepo { get; set; }
-        private readonly IHostEnvironment _env;
-
-        public IdentityContext(DbContextOptions<IdentityContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : base(options)
-        {
-            _bogusRepo = bogusRepo;
-            _env = env;
-        }
+        private IBogusRepository BogusRepo { get; set; } = bogusRepo;
+        private readonly IHostEnvironment _env = env;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,9 +21,9 @@ namespace DevHotelAPI.Contexts.Identity
 
         public void DbInitialize(ModelBuilder modelBuilder)
         {
-            var usersFaker = _bogusRepo.GenerateUsers();
-            var rolesFaker = _bogusRepo.GenerateRoles();
-            var usersRolesFaker = _bogusRepo.AssignRolesToFakeUsers();
+            var usersFaker = BogusRepo.GenerateUsers();
+            var rolesFaker = BogusRepo.GenerateRoles();
+            var usersRolesFaker = BogusRepo.AssignRolesToFakeUsers();
 
             modelBuilder.Entity<IdentityUser<Guid>>().HasData(usersFaker);
             modelBuilder.Entity<IdentityRole<Guid>>().HasData(rolesFaker);

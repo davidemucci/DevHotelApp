@@ -21,16 +21,15 @@ namespace DevHotelAppTest.UnitTests
     public class ReservationRepositoryTests : IClassFixture<DatabaseFixture>
     {
         private readonly HotelDevContext _context;
-        private readonly IdentityContext _identityContext;
         private readonly UserManager<IdentityUser<Guid>> _userManager;
         private readonly ReservationRepository _repository;
 
         public ReservationRepositoryTests(DatabaseFixture _databaseFixture)
         {
             _databaseFixture.ResetContext();
-            _context = _databaseFixture._context;
+            _context = _databaseFixture.Context;
             _userManager = _databaseFixture._userManager;
-            _repository = new ReservationRepository(_context, _databaseFixture._identityContext, _userManager);
+            _repository = new ReservationRepository(_context, _databaseFixture.IdentityContext, _userManager);
         }
 
         [Fact]
@@ -43,7 +42,7 @@ namespace DevHotelAppTest.UnitTests
             var customer = new Faker<Customer>()
                 .RuleFor(c => c.Id, f => Guid.NewGuid())
                 .RuleFor(c => c.Email, f => f.Internet.Email())
-                .RuleFor(c => c.IdentityUserId, f => user.Id)
+                .RuleFor(c => c.IdentityUserId, f => user?.Id)
                 .Generate();
 
             await _context.Customers.AddAsync(customer);
@@ -93,7 +92,7 @@ namespace DevHotelAppTest.UnitTests
             var customer = new Faker<Customer>()
                 .RuleFor(c => c.Id, f => Guid.NewGuid())
                 .RuleFor(c => c.Email, f => f.Internet.Email())
-                .RuleFor(c => c.IdentityUserId, f => user.Id)
+                .RuleFor(c => c.IdentityUserId, f => user?.Id)
                 .Generate();
 
             await _context.Customers.AddAsync(customer);
@@ -149,7 +148,7 @@ namespace DevHotelAppTest.UnitTests
             var customer = new Faker<Customer>()
                 .RuleFor(c => c.Id, f => Guid.NewGuid())
                 .RuleFor(c => c.Email, f => f.Internet.Email())
-                .RuleFor(c => c.IdentityUserId, f => user.Id)
+                .RuleFor(c => c.IdentityUserId, f => user?.Id)
                 .Generate();
 
             await _context.Customers.AddAsync(customer);

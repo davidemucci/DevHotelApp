@@ -15,11 +15,9 @@ namespace DevHotelAppTest.UnitTests
     {
         private readonly HotelDevContext _context;
         private readonly RoomTypeRepository _repository;
-        private readonly UserManager<IdentityUser<Guid>> _userManager;
         public RoomTypeRepositoryTests(DatabaseFixture databaseFixture)
         {
-            _context = databaseFixture._context;
-            _userManager = databaseFixture._userManager;
+            _context = databaseFixture.Context;
             _repository = new RoomTypeRepository(_context);
         }
 

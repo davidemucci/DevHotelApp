@@ -18,7 +18,7 @@ namespace DevHotelAppTest.UnitTests
         public RoomRepositoryTests(DatabaseFixture databaseFixture)
         {
             databaseFixture.ResetContext();
-            _context = databaseFixture._context;
+            _context = databaseFixture.Context;
             _repository = new RoomRepository(_context); 
         }
 

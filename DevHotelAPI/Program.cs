@@ -1,6 +1,5 @@
 using DevHotelAPI.Contexts;
 using DevHotelAPI.Entities;
-using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
 using DevHotelAPI.Services.Repositories;

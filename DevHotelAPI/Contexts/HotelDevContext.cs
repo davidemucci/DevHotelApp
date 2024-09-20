@@ -9,26 +9,21 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DevHotelAPI.Contexts
 {
-    public class HotelDevContext : DbContext
+    public class HotelDevContext(DbContextOptions<HotelDevContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : DbContext(options)
     {
-        private readonly IHostEnvironment _env;
-        public HotelDevContext(DbContextOptions<HotelDevContext> options, IBogusRepository bogusRepo, IHostEnvironment env) : base(options)
-        {
-            _bogusRepo = bogusRepo;
-            _env = env;
-        }
+        private readonly IHostEnvironment _env = env;
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
-        private IBogusRepository _bogusRepo { get; set; }
+        private IBogusRepository BogusRepo { get; set; } = bogusRepo;
         public void DbInitialize(ModelBuilder modelBuilder)
         {
-            var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
-            var roomsFaker = _bogusRepo.GenerateRooms();
-            var customersFaker = _bogusRepo.GenerateCustomers();
-            var reservationsFaker = _bogusRepo.GenerateReservations();
+            var roomTypesFaker = BogusRepo.GenerateRoomTypes();
+            var roomsFaker = BogusRepo.GenerateRooms();
+            var customersFaker = BogusRepo.GenerateCustomers();
+            var reservationsFaker = BogusRepo.GenerateReservations();
 
             modelBuilder.Entity<RoomType>().HasData(roomTypesFaker);
             modelBuilder.Entity<Room>().HasData(roomsFaker);

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using DevHotelAPI.Contexts;
 using DevHotelAPI.Contexts.Identity;
-using DevHotelAPI.Services;
 using DevHotelAPI.Services.Contracts;
 using DevHotelAPI.Services.Mapper;
+using DevHotelAPI.Services.Repositories;
 using DevHotelAPI.Services.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -21,13 +21,12 @@ namespace DevHotelAppTest
 {
     public class DatabaseFixture : IAsyncLifetime
     {
-        private BogusRepository _bogusRepo;
-        private UserManager<IdentityUser<Guid>> _userManger;
-        public HotelDevContext _context { get; private set; }
-        public IdentityContext _identityContext { get; private set; }
+        private readonly BogusRepository BogusRepo;
+        public HotelDevContext Context { get; private set; }
+        public IdentityContext IdentityContext { get; private set; }
         public UserManager<IdentityUser<Guid>> _userManager;
-        public ILogger _logger { get; private set; }
-        public IHandleExceptionService _handleExceptionService { get; private set; }
+        public ILogger Logger { get; private set; }
+        public IHandleExceptionService HandleExceptionService { get; private set; }
 
 
         public string userNameAdmin;
@@ -37,15 +36,49 @@ namespace DevHotelAppTest
         public List<Guid> reservationsId;
         public List<int> roomsId;
         public List<int> roomTypesId;
-        public List<string> descRoomTypes;
 
         public DatabaseFixture()
         {
+            var options = new DbContextOptionsBuilder<HotelDevContext>()
+               .UseInMemoryDatabase(databaseName: "TestHotelDevDb-" + Guid.NewGuid())
+               .EnableSensitiveDataLogging()
+               .Options;
+
+            var optionsIdentity = new DbContextOptionsBuilder<IdentityContext>()
+                .UseInMemoryDatabase(databaseName: "TestIdentityHotelDevDb-" + Guid.NewGuid())
+                .EnableSensitiveDataLogging()
+                .Options;
+
+            IHostEnvironment env = new HostEnvironment()
+            {
+                EnvironmentName = "Staging",
+                ApplicationName = "App",
+                ContentRootPath = ""
+            };
+
+            BogusRepo = new BogusRepository();
+            Context = new HotelDevContext(options, BogusRepo, env);
+            IdentityContext = new IdentityContext(optionsIdentity, BogusRepo, env);
+            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(IdentityContext);
+            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null!, null!, null!, null!, null!, null!, null!, null!);
+            Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .CreateLogger();
+            HandleExceptionService = new HandleExceptionService(Logger);
+
+            userNameAdmin = BogusRepo.UserNameAdmin;
+            userNameConsumer = BogusRepo.UserNameConsumer;
+            consumerId = BogusRepo.ConsumerId;
+            adminId = BogusRepo.AdminId;
+            reservationsId = BogusRepo.ReservationsId;
+            roomsId = BogusRepo.RoomsId;
+            roomTypesId = BogusRepo.RoomTypesId;
+
         }
 
         public void DetachAllEntities()
         {
-            var changedEntriesCopy = _context.ChangeTracker.Entries()
+            var changedEntriesCopy = Context.ChangeTracker.Entries()
                 .Where(e => e.State == EntityState.Added ||
                             e.State == EntityState.Modified ||
                             e.State == EntityState.Deleted ||
@@ -60,14 +93,14 @@ namespace DevHotelAppTest
 
         public async Task DisposeAsync()
         {
-            _identityContext.Database.EnsureDeleted();
-            _context.Database.EnsureDeleted();
+            IdentityContext.Database.EnsureDeleted();
+            Context.Database.EnsureDeleted();
 
-            await _context.DisposeAsync();
-            await _identityContext.DisposeAsync();
+            await Context.DisposeAsync();
+            await IdentityContext.DisposeAsync();
         }
 
-        public IMapper GetMapper()
+        public static IMapper GetMapper()
         {
             var config = new MapperConfiguration(cfg =>
             {
@@ -78,33 +111,6 @@ namespace DevHotelAppTest
 
         public async Task InitializeAsync()
         {
-            var options = new DbContextOptionsBuilder<HotelDevContext>()
-                .UseInMemoryDatabase(databaseName: "TestHotelDevDb-" + Guid.NewGuid())
-                .EnableSensitiveDataLogging()
-                .Options;
-
-            var optionsIdentity = new DbContextOptionsBuilder<IdentityContext>()
-                .UseInMemoryDatabase(databaseName: "TestIdentityHotelDevDb-" + Guid.NewGuid())
-                .EnableSensitiveDataLogging()
-                .Options;
-
-            IHostEnvironment env = new HostEnvironment()
-            {
-                EnvironmentName = "Staging",
-                ApplicationName = "App",
-                ContentRootPath = ""
-            };
-
-            _bogusRepo = new BogusRepository();
-            _context = new HotelDevContext(options, _bogusRepo, env);
-            _identityContext = new IdentityContext(optionsIdentity, _bogusRepo, env);
-            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(_identityContext);
-            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null, null, null, null, null, null, null, null);
-            _logger = new LoggerConfiguration()
-                    .WriteTo.Console()
-                    .CreateLogger();
-            _handleExceptionService = new HandleExceptionService(_logger);
-
             ResetContext();
         }
 
@@ -112,29 +118,29 @@ namespace DevHotelAppTest
         {
 
 
-            _identityContext.Database.EnsureDeleted();
-            _context.Database.EnsureDeleted();
+            IdentityContext.Database.EnsureDeleted();
+            Context.Database.EnsureDeleted();
 
-            _identityContext.Database.EnsureCreated();
-            _context.Database.EnsureCreated();
+            IdentityContext.Database.EnsureCreated();
+            Context.Database.EnsureCreated();
 
-            userNameAdmin = _bogusRepo.UserNameAdmin;
-            userNameConsumer = _bogusRepo.UserNameConsumer;
-            consumerId = _bogusRepo.ConsumerId;
-            adminId = _bogusRepo.AdminId;
-            reservationsId = _bogusRepo.ReservationsId;
-            roomsId = _bogusRepo.RoomsId;
-            roomTypesId = _bogusRepo.RoomTypesId;
+            userNameAdmin = BogusRepo.UserNameAdmin;
+            userNameConsumer = BogusRepo.UserNameConsumer;
+            consumerId = BogusRepo.ConsumerId;
+            adminId = BogusRepo.AdminId;
+            reservationsId = BogusRepo.ReservationsId;
+            roomsId = BogusRepo.RoomsId;
+            roomTypesId = BogusRepo.RoomTypesId;
 
             DetachAllEntities();
         }
 
         public void SetHttpContextAsAdminUser(ControllerBase controller)
         {
-            var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, userNameAdmin)
-            }, "mock"));
+            var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new (ClaimTypes.Name, userNameAdmin)
+            ], "mock"));
 
             controller.ControllerContext = new ControllerContext
             {
@@ -144,10 +150,10 @@ namespace DevHotelAppTest
 
         public void SetHttpContextAsConsumerUser(ControllerBase controller)
         {
-            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, userNameConsumer)
-            }, "mock"));
+            var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new (ClaimTypes.Name, userNameConsumer)
+            ], "mock"));
 
             controller.ControllerContext = new ControllerContext
             {
@@ -157,9 +163,9 @@ namespace DevHotelAppTest
 
         public class HostEnvironment : IHostEnvironment
         {
-            public string EnvironmentName { get; set; }
-            public string ApplicationName { get; set; }
-            public string ContentRootPath { get; set; }
+            public string EnvironmentName { get; set; } = string.Empty;
+            public string ApplicationName { get; set; } = string.Empty;
+            public string ContentRootPath { get; set; } = string.Empty;
             IFileProvider IHostEnvironment.ContentRootFileProvider { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         }
     }
