@@ -5,8 +5,8 @@
         public enum Roles
         {
 
-            ADMINISTRATOR,
-            CUSTOMER
+            Administrator,
+            Consumer
         };
     }
 }

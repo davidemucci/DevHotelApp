@@ -3,14 +3,24 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using DevHotelAPI.Contexts;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Cryptography.Xml;
+using DevHotelAPI.Entities;
+using DevHotelAPI.Contexts.Identity;
+using DevHotelAPI.Services.Utility;
 
 namespace DevHotelAPI.Services.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-        public AccountRepository(IConfiguration configuration)
+        private readonly HotelDevContext _context;
+        private readonly UserManager<IdentityUser<Guid>> _userManager;
+        public AccountRepository(IConfiguration configuration, HotelDevContext context, UserManager<IdentityUser<Guid>> userManager)
         {
+            _context = context;
             _configuration = configuration;
+            _userManager = userManager;
         }
 
         public IConfiguration _configuration { get; set; }
@@ -58,6 +68,20 @@ namespace DevHotelAPI.Services.Repositories
             var securityToken = tokenHandler.CreateToken(tokenDescriptor);
             var token = tokenHandler.WriteToken(securityToken);
             return token;
+        }
+
+        public async Task CreateCostumer(IdentityUser<Guid> identity)
+        {
+            var costumer = new Customer()
+            {
+                Name = identity.UserName,
+                Email = identity.Email!,
+                IdentityUserId = identity.Id
+            };
+
+            await _context.Customers.AddAsync(costumer);
+            await _userManager.AddToRoleAsync(identity, HotelDevUtilities.Roles.Consumer.ToString());
+            await _context.SaveChangesAsync();
         }
     }
 }

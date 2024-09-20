@@ -20,8 +20,7 @@ namespace DevHotelAPI.Controllers
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                ModelState.AddModelError("", "Invalid email or password");
-                return BadRequest(ModelState);
+                return BadRequest("Invalid email or password.");
             }
             else
             {
@@ -31,23 +30,14 @@ namespace DevHotelAPI.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<IdentityUser<Guid>>>> GetUsers()
-        {
-            var users = await _context.Users.ToListAsync();
-            return Ok(users);
-        }
-
-
-
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] AddOrUpdateCustomerModel model)
         {
             var existedUser = await _userManager.FindByNameAsync(model.UserName);
-            if (existedUser != null)
+            var existedUserEmail = await _userManager.FindByNameAsync(model.Email);
+            if (existedUser != null || existedUserEmail != null)
             {
-                ModelState.AddModelError("", "User name is already taken");
-                return BadRequest(ModelState);
+                return BadRequest("User name or email is already taken");
             }
 
             var user = new IdentityUser<Guid>()
@@ -59,8 +49,13 @@ namespace DevHotelAPI.Controllers
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
+            
+
             if (result.Succeeded)
+            {
+                 await _repo.CreateCostumer(user);
                 return Ok(_repo.GenerateToken(model.UserName, new List<string>() { "Consumer" }));
+            }
             else
             {
                 foreach (var error in result.Errors)

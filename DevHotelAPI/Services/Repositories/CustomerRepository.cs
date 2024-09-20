@@ -28,7 +28,7 @@ namespace DevHotelAPI.Services.Repositories
         {
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
 
-            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.Administrator.ToString());
 
             var customer = await _context.Customers.FindAsync(id) ?? throw new ArgumentNullException($"Customer with id {id} not found");
 
@@ -49,7 +49,7 @@ namespace DevHotelAPI.Services.Repositories
         public async Task<Customer?> GetCustomerByIdAsync(Guid id, string userName)
         {
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
-            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.Administrator.ToString());
             var customer = await _context.Customers.FindAsync(id) ?? throw new ArgumentNullException($"Customer with id {id} not found");
 
             return isAdmin || user.Id.Equals(customer.IdentityUserId) 
@@ -64,7 +64,7 @@ namespace DevHotelAPI.Services.Repositories
         public async Task UpdateCustomerAsync(Customer customer, string userName)
         {
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User with username {userName} not found");
-            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.Administrator.ToString());
 
             customer.IdentityUserId = customer.IdentityUserId.Equals(Guid.Empty) ? user.Id : customer.IdentityUserId;
 

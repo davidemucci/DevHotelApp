@@ -115,7 +115,7 @@ namespace DevHotelAPI.Services.Repositories
             .RuleFor(u => u.Name, f => id == 0 ? "Administrator" : "Consumer")
             .RuleFor(u => u.NormalizedName, f =>
             {
-                var name = id == 0 ? "Administrator" : "Consumer";
+                var name = id == 0 ? "ADMINISTRATOR" : "CONSUMER";
                 id++;
                 return name;
             });

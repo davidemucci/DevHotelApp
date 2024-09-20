@@ -19,7 +19,7 @@ namespace DevHotelAPI.Services.Repositories
         public async Task AddReservationAsync(Reservation reservation, string userName)
         {
             var user = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
-            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.Administrator.ToString());
 
             if
             (
@@ -50,7 +50,7 @@ namespace DevHotelAPI.Services.Repositories
             var identityUser = await _userManager.FindByNameAsync(userName) ?? 
                 throw new UnauthorizedAccessException($"User not found with username {userName}");
 
-            var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.Administrator.ToString());
 
             var reservationQuery = from res in _context.Reservations
                                    join user in _context.Customers on res.CustomerId equals user.Id into u2
@@ -75,7 +75,7 @@ namespace DevHotelAPI.Services.Repositories
             var user = await _userManager.FindByNameAsync(userName) 
                 ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
 
-            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(user, HotelDevUtilities.Roles.Administrator.ToString());
             IQueryable<Reservation> reseservationQuery;
 
             reseservationQuery = from res in _context.Reservations
@@ -91,7 +91,7 @@ namespace DevHotelAPI.Services.Repositories
         {
             var identityUser = await _userManager.FindByNameAsync(userName) ?? throw new UnauthorizedAccessException($"User not found with username {userName}");
 
-            var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+            var isAdmin = await _userManager.IsInRoleAsync(identityUser, HotelDevUtilities.Roles.Administrator.ToString());
 
             IQueryable<Reservation> reservationQuery = from res in _context.Reservations
                                                        join cus in _context.Customers on res.CustomerId equals cus.Id into u2
@@ -117,7 +117,7 @@ namespace DevHotelAPI.Services.Repositories
                 reservation.CustomerId.Equals(c.Id)).AnyAsync();
 
             var isAdmin = await _userManager.IsInRoleAsync(
-               identityUser, HotelDevUtilities.Roles.ADMINISTRATOR.ToString());
+               identityUser, HotelDevUtilities.Roles.Administrator.ToString());
 
             if (isAdmin || isItsOwnReservation)
             {
