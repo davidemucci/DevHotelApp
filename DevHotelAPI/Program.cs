@@ -42,7 +42,7 @@ try
         .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         );
-    
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(opt =>
     {
@@ -171,6 +171,8 @@ try
     app.MapControllers();
 
     app.Run();
+}catch(HostAbortedException)
+{
 }
 catch (Exception ex)
 {

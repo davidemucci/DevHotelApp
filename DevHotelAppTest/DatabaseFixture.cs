@@ -34,18 +34,10 @@ namespace DevHotelAppTest
         public string userNameConsumer;
         public Guid consumerId;
         public Guid adminId;
-        public Guid consumerIdentityId;
-        public Guid adminIdenityId;
         public List<Guid> reservationsId;
         public List<int> roomsId;
         public List<int> roomTypesId;
-        public List<string> roles;
         public List<string> descRoomTypes;
-
-        public int reservationCount;
-        public int customersCount;
-        public int roomCount;
-        public int totalRooms;
 
         public DatabaseFixture()
         {
@@ -130,14 +122,9 @@ namespace DevHotelAppTest
             userNameConsumer = _bogusRepo.UserNameConsumer;
             consumerId = _bogusRepo.ConsumerId;
             adminId = _bogusRepo.AdminId;
-            consumerIdentityId = _bogusRepo.ConsumerIdentityId;
-            adminIdenityId = _bogusRepo.AdminIdenityId;
             reservationsId = _bogusRepo.ReservationsId;
             roomsId = _bogusRepo.RoomsId;
             roomTypesId = _bogusRepo.RoomTypesId;
-            roles = _bogusRepo.Roles;
-            roomCount = _bogusRepo.RoomCount;
-            totalRooms = _bogusRepo.TotalRooms;
 
             DetachAllEntities();
         }
@@ -146,7 +133,7 @@ namespace DevHotelAppTest
         {
             var userAdmin = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, "ADMIN")
+                new Claim(ClaimTypes.Name, userNameAdmin)
             }, "mock"));
 
             controller.ControllerContext = new ControllerContext
@@ -159,7 +146,7 @@ namespace DevHotelAppTest
         {
             var userConsumer = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, "CONSUMER")
+                new Claim(ClaimTypes.Name, userNameConsumer)
             }, "mock"));
 
             controller.ControllerContext = new ControllerContext

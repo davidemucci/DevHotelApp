@@ -26,9 +26,9 @@ namespace DevHotelAPI.Contexts
         public void DbInitialize(ModelBuilder modelBuilder)
         {
             var roomTypesFaker = _bogusRepo.GenerateRoomTypes();
-            var roomsFaker = _bogusRepo.GenerateRooms(4, 10);
+            var roomsFaker = _bogusRepo.GenerateRooms();
             var customersFaker = _bogusRepo.GenerateCustomers();
-            var reservationsFaker = _bogusRepo.GenerateReservations(customersFaker);
+            var reservationsFaker = _bogusRepo.GenerateReservations();
 
             modelBuilder.Entity<RoomType>().HasData(roomTypesFaker);
             modelBuilder.Entity<Room>().HasData(roomsFaker);

@@ -96,7 +96,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CustomerId = new Guid("22222222-2222-2222-2222-222222222221"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 100,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -112,7 +112,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111113"),
-                            CustomerId = new Guid("22222222-2222-2222-2222-222222222221"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 102,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)

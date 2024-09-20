@@ -9,11 +9,11 @@ namespace DevHotelAPI.Services.Contracts
     {
 
         List<Customer> GenerateCustomers();
-        List<Reservation> GenerateReservations(List<Customer> customersFaker);
-        List<Room> GenerateRooms(int roomTypesTotalNumber = 4, int totalRoomsBumber = 10);
+        List<Reservation> GenerateReservations();
+        List<Room> GenerateRooms();
         List<RoomType> GenerateRoomTypes();
         List<IdentityUser<Guid>> GenerateUsers();
         List<IdentityRole<Guid>> GenerateRoles();
-        List<IdentityUserRole<Guid>> AssignRolesToFakeUsers(List<IdentityRole<Guid>> roles, List<IdentityUser<Guid>> users);
+        List<IdentityUserRole<Guid>> AssignRolesToFakeUsers();
     }
 }

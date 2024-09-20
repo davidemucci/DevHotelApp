@@ -29,7 +29,7 @@ namespace DevHotelAPI.Contexts.Identity
         {
             var usersFaker = _bogusRepo.GenerateUsers();
             var rolesFaker = _bogusRepo.GenerateRoles();
-            var usersRolesFaker = _bogusRepo.AssignRolesToFakeUsers(rolesFaker, usersFaker);
+            var usersRolesFaker = _bogusRepo.AssignRolesToFakeUsers();
 
             modelBuilder.Entity<IdentityUser<Guid>>().HasData(usersFaker);
             modelBuilder.Entity<IdentityRole<Guid>>().HasData(rolesFaker);

@@ -105,13 +105,13 @@ namespace DevHotelAppTest.IntegrationTests
                 HttpContext = new DefaultHttpContext { User = userConsumer }
             };
 
-            // Act
+            // Act 
             var result = await _controller.GetReservationByCustomerId(customerId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnValue = Assert.IsType<List<ReservationDto>>(okResult.Value);
-            Assert.Equal(2, returnValue.Count);
+            Assert.Equal(4, returnValue.Count);
         }
 
         [Fact]
@@ -131,11 +131,11 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = _databaseFixture.consumerId,
                 From = DateTime.Now.AddDays(1),
                 To = DateTime.Now,
                 RoomNumber = 102
-            }; ;
+            };
 
             // Act
             var result = await _controller.PostReservation(reservationDto);
@@ -249,7 +249,7 @@ namespace DevHotelAppTest.IntegrationTests
             // Arrange
             var reservationDto = new ReservationDto
             {
-                CustomerId = Guid.Parse("22222222-2222-2222-2222-222222222221"),
+                CustomerId = _databaseFixture.consumerId,
                 From = new DateTime(2027, 1, 15, 15, 0, 0),
                 To = new DateTime(2027, 1, 17, 15, 0, 0),
                 RoomNumber = 100

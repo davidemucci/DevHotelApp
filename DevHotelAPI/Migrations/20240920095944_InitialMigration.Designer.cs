@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHotelAPI.Migrations
 {
     [DbContext(typeof(HotelDevContext))]
-    [Migration("20240906074611_changeReservationFakeDates")]
-    partial class changeReservationFakeDates
+    [Migration("20240920095944_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace DevHotelAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DevHotelAPI.Entities.Client", b =>
+            modelBuilder.Entity("DevHotelAPI.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -38,11 +38,10 @@ namespace DevHotelAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("IdentityUserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
@@ -53,22 +52,22 @@ namespace DevHotelAPI.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Clients");
+                    b.ToTable("Customers");
 
                     b.HasData(
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222221"),
-                            Address = "76098 Torphy Overpass",
+                            Address = "239 Lucy Burg",
                             Email = "Bernita_Konopelski43@gmail.com",
-                            Password = "Ay7ZbbzDk0"
+                            IdentityUserId = new Guid("99999999-9999-9999-9999-999999999991")
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Address = "699 Walter Corners",
+                            Address = "0053 Adelle Spring",
                             Email = "Guillermo.Cummerata30@hotmail.com",
-                            Password = "lJ5hPDb6ee"
+                            IdentityUserId = new Guid("99999999-9999-9999-9999-999999999992")
                         });
                 });
 
@@ -78,7 +77,7 @@ namespace DevHotelAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClientId")
+                    b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("From")
@@ -92,7 +91,7 @@ namespace DevHotelAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Reservations");
 
@@ -100,7 +99,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            ClientId = new Guid("22222222-2222-2222-2222-222222222221"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 100,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -108,7 +107,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111112"),
-                            ClientId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 101,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -116,7 +115,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111113"),
-                            ClientId = new Guid("22222222-2222-2222-2222-222222222221"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 102,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -124,7 +123,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111114"),
-                            ClientId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222222"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 103,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -132,7 +131,7 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111115"),
-                            ClientId = new Guid("22222222-2222-2222-2222-222222222221"),
+                            CustomerId = new Guid("22222222-2222-2222-2222-222222222221"),
                             From = new DateTime(2027, 1, 16, 15, 15, 0, 0, DateTimeKind.Unspecified),
                             RoomNumber = 104,
                             To = new DateTime(2027, 1, 18, 15, 15, 0, 0, DateTimeKind.Unspecified)
@@ -220,6 +219,9 @@ namespace DevHotelAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -238,24 +240,28 @@ namespace DevHotelAPI.Migrations
                         new
                         {
                             Id = 1,
+                            Capacity = 1,
                             Description = "Room",
                             TotalNumber = 13
                         },
                         new
                         {
                             Id = 2,
+                            Capacity = 2,
                             Description = "TwinRoom",
                             TotalNumber = 39
                         },
                         new
                         {
                             Id = 3,
+                            Capacity = 3,
                             Description = "Triple",
                             TotalNumber = 15
                         },
                         new
                         {
                             Id = 4,
+                            Capacity = 4,
                             Description = "Suite",
                             TotalNumber = 41
                         });
@@ -263,13 +269,13 @@ namespace DevHotelAPI.Migrations
 
             modelBuilder.Entity("DevHotelAPI.Entities.Reservation", b =>
                 {
-                    b.HasOne("DevHotelAPI.Entities.Client", "Client")
+                    b.HasOne("DevHotelAPI.Entities.Customer", "Customer")
                         .WithMany("Reservations")
-                        .HasForeignKey("ClientId")
+                        .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Client");
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("DevHotelAPI.Entities.Room", b =>
@@ -283,7 +289,7 @@ namespace DevHotelAPI.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("DevHotelAPI.Entities.Client", b =>
+            modelBuilder.Entity("DevHotelAPI.Entities.Customer", b =>
                 {
                     b.Navigation("Reservations");
                 });
