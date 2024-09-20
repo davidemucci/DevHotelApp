@@ -32,7 +32,9 @@ namespace DevHotelAppTest
         public string userNameAdmin;
         public string userNameConsumer;
         public Guid consumerId;
+        public Guid consumerIdentityId;
         public Guid adminId;
+        public Guid adminIdentityId;
         public List<Guid> reservationsId;
         public List<int> roomsId;
         public List<int> roomTypesId;
@@ -59,20 +61,6 @@ namespace DevHotelAppTest
             BogusRepo = new BogusRepository();
             Context = new HotelDevContext(options, BogusRepo, env);
             IdentityContext = new IdentityContext(optionsIdentity, BogusRepo, env);
-            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(IdentityContext);
-            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null!, null!, null!, null!, null!, null!, null!, null!);
-            Logger = new LoggerConfiguration()
-                    .WriteTo.Console()
-                    .CreateLogger();
-            HandleExceptionService = new HandleExceptionService(Logger);
-
-            userNameAdmin = BogusRepo.UserNameAdmin;
-            userNameConsumer = BogusRepo.UserNameConsumer;
-            consumerId = BogusRepo.ConsumerId;
-            adminId = BogusRepo.AdminId;
-            reservationsId = BogusRepo.ReservationsId;
-            roomsId = BogusRepo.RoomsId;
-            roomTypesId = BogusRepo.RoomTypesId;
 
         }
 
@@ -116,14 +104,25 @@ namespace DevHotelAppTest
 
         public void ResetContext()
         {
-
-
             IdentityContext.Database.EnsureDeleted();
             Context.Database.EnsureDeleted();
 
             IdentityContext.Database.EnsureCreated();
             Context.Database.EnsureCreated();
 
+            var identityStore = new UserStore<IdentityUser<Guid>, IdentityRole<Guid>, IdentityContext, Guid>(IdentityContext);
+            _userManager = new UserManager<IdentityUser<Guid>>(identityStore, null!, new PasswordHasher<IdentityUser<Guid>>(),
+                new List<IUserValidator<IdentityUser<Guid>>> { new UserValidator<IdentityUser<Guid>>() }
+                , null!, new UpperInvariantLookupNormalizer(), null!, null!, null!);
+            Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .CreateLogger();
+            HandleExceptionService = new HandleExceptionService(Logger);
+
+
+            var roles = IdentityContext.Roles.ToList();
+            consumerIdentityId = BogusRepo.ConsumerIdentityId;
+            adminIdentityId = BogusRepo.AdminIdenityId;
             userNameAdmin = BogusRepo.UserNameAdmin;
             userNameConsumer = BogusRepo.UserNameConsumer;
             consumerId = BogusRepo.ConsumerId;
